@@ -11,17 +11,17 @@ import (
 	"github.com/patrickmn/go-cache"
 
 	"jam-packed-webapi/internal/middleware"
-	"jam-packed-webapi/internal/models"
+	"jam-packed-webapi/internal/queue"
 	"jam-packed-webapi/internal/routes"
-	"jam-packed-webapi/internal/workers"
+	"jam-packed-webapi/internal/server"
 	"jam-packed-webapi/internal/ws"
 )
 
 var (
 	validate = validator.New()
-	jobQueue = make(chan models.CheckAuraRequestDto, 100)
+	jobQueue = make(chan queue.Job, 100)
 
-	// A global cache for previous-processed results to lessen CPU load (perf gain)
+	// A global cache for repeated queries to lessen server load and latency
 	resultCache = cache.New(5*time.Minute, 10*time.Minute)
 
 	// Routes that bypass the auth middleware
@@ -34,8 +34,10 @@ var (
 func main() {
 	_ = godotenv.Load()
 
+	// TODO: Add better logger
+
 	wsHub := ws.NewHub()
-	go workers.StartWorker(jobQueue, resultCache, wsHub)
+	go queue.StartWorker(jobQueue, resultCache, wsHub)
 
 	router := gin.Default()
 
@@ -51,7 +53,8 @@ func main() {
 
 	router.GET("/", routes.HealthCheckHandler)
 	router.GET("/ws", ws.ServeWS(wsHub))
-	router.POST("/api/check-aura", routes.AuraCheckHandler(validate, resultCache, jobQueue))
+	router.POST("/api/check-aura", routes.AuraCheckHandler(validate, resultCache, jobQueue, wsHub))
 
-	router.Run(":8080")
+	// router.Run(":8080")
+	server.RunServerWithGracefulShutdown(router, 8080, 5*time.Second)
 }
