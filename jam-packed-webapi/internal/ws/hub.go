@@ -15,7 +15,7 @@ func NewHub() *Hub {
 		maxRooms:          100,
 		maxClientsPerRoom: 20,
 	}
-	// Separate thread
+	// Separate vThread (goroutine)
 	go hub.run()
 	return hub
 }
