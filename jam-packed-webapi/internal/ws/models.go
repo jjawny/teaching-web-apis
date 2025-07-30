@@ -2,7 +2,6 @@ package ws
 
 import "github.com/gorilla/websocket"
 
-// TODO: limit the number of rooms and clients per room for performance/(scalability?)
 type Client struct {
 	conn     *websocket.Conn
 	hub      *Hub
