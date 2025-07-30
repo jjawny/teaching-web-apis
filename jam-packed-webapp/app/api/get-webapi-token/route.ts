@@ -6,12 +6,12 @@ var jwt = require("jsonwebtoken");
 // ISSUE:
 // We need a secure way to connect the auth flow between this webapp and the main webapi
 // What about NextAuth's JWTs?
-//  NextAuth has 2 access tokens:
-//    1. NextAuth JWT token
+//  NextAuth has 3 built-in tokens:
+//    - NextAuth JWT (session) token
 //      Used for session management within webapp
 //      Not recommended to use outside of webapp, difficult/unreliable to extract
-//    2. Google OAuth token
-//      Used for authenticating w Google
+//    - Google OAuth (access and ID) tokens
+//      Used for authenticating w Google + accessing Google APIs
 //      Not recommended to use outside of Google services, short lifespan/ttl, not meant for custom APIs
 // SOLUTION:
 //  We issue a custom JWT token for the webapi if the user is authed in the webapp, transferring the necessary claims
