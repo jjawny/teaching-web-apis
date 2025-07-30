@@ -3,7 +3,7 @@ import Google from "next-auth/providers/google";
 import { serverEnv } from "~/shared/modules/env";
 
 // #AUTH
-// TODO: mention how this is shared w the  middleware
+// This object represents our auth configuration; used in NextJS Route Handlers and Middleware
 export const authConfig: NextAuthConfig = {
   // debug: false,
   session: { strategy: "jwt" },
