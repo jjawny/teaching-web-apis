@@ -8,11 +8,13 @@ export default auth(async function middleware(request) {
   const isAuthenticated = request.auth;
 
   if (!isAuthenticated) {
-    return new NextResponse("User is not authenticated", { status: 401 });
+    return new NextResponse(JSON.stringify({ error: "User is not authenticated" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const response = NextResponse.next();
-
   return response;
 });
 
