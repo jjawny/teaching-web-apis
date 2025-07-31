@@ -29,15 +29,15 @@ export default function Hero() {
           priority
         />
       </div>
-      <h1 className="font-libertinus-mono text-center font-bold">
-        <span className="text-2xl">Do You Have More</span>
-        <span className="text-3xl">
+      <h1 className="font-instrument-serif text-center font-bold">
+        <span className="text-4xl">Do You Have More</span>
+        <span className="text-5xl">
           {" "}
           Aura
           <br />
           Than
         </span>
-        <span className="text-4xl"> Ryan Gosling?</span>
+        <span className="text-6xl"> Ryan Gosling?</span>
       </h1>
     </div>
   );
