@@ -12,9 +12,9 @@ export default function SvgFilters() {
             dy="0"
             stdDeviation="3"
             in="SourceGraphic"
-            flood-color="#dbdbdb"
+            floodColor="#dbdbdb"
             result="blur"
-            flood-opacity="1"
+            floodOpacity="1"
           ></feDropShadow>
           <feColorMatrix
             type="matrix"
@@ -22,7 +22,7 @@ export default function SvgFilters() {
             in="blur"
             result="outline"
           ></feColorMatrix>
-          <feFlood flood-color="#dbdbdb" flood-opacity="1" result="offsetColor"></feFlood>
+          <feFlood floodColor="#dbdbdb" floodOpacity="1" result="offsetColor"></feFlood>
           <feComposite
             in="offsetColor"
             in2="outline"
