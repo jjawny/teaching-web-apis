@@ -1,13 +1,11 @@
 "use client";
 
-import { ClassValue } from "clsx";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { GOOGLE_LOGO_URL } from "~/client/components/constants";
 import { cn } from "~/client/utils/cn";
 
-export function SignInButton(props: { className?: ClassValue }) {
-  const { className } = props;
+export function SignInButton({ className }: { className?: string }) {
   const GoogleLogo = () => (
     <Image
       priority
@@ -25,7 +23,7 @@ export function SignInButton(props: { className?: ClassValue }) {
         // size="small"
         // variant="outlined"
         // startIcon={<GoogleLogo />}
-        className="bg-stone-200"
+        className={cn(className, "bg-stone-300")}
         onClick={() => signIn("google")}
         // sx={{
         //   textTransform: "none",
