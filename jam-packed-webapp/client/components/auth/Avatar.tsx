@@ -5,7 +5,7 @@ import { userCtx } from "~/client/modules/user-context/UserCtx";
 
 const AVATAR_DIMENSIONS_PX = 25;
 
-export function AuthAvatar() {
+export function Avatar() {
   const { user, authStatus } = userCtx();
 
   // if (authStatus === "loading")
