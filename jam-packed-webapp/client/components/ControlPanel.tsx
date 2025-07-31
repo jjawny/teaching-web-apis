@@ -26,7 +26,7 @@ export default function ControlPanel() {
   const [eventLog, setEventLog] = useState<any[]>([]);
   const [httpStatus, setHttpStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [httpError, setHttpError] = useState<string | null>(null);
-  const [query, setQuery] = useState("hello");
+  const [query, setQuery] = useState("madman");
   const { message, connected, isPromptForPin } = useJobWebSocket(roomId, token, pin);
 
   useEffect(() => {
@@ -78,18 +78,15 @@ export default function ControlPanel() {
 
   return (
     <div className="mx-auto max-w-xl p-4">
-      <input className="w-full rounded-md border border-gray-300 p-2" placeholder="your username" />
       <h1 className="mb-2 text-xl font-bold">Job Status</h1>
       <div className="mb-2">
-        <label>
-          Query:{" "}
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="rounded border px-2 py-1"
-            disabled={processing}
-          />
-        </label>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="rounded border px-2 py-1"
+          placeholder="Your Username"
+          disabled={processing}
+        />
       </div>
       {isPromptForPin && (
         <input
