@@ -29,7 +29,7 @@ export default function Hero() {
           priority
         />
       </div>
-      <h1 className="font-instrument-serif text-center font-bold">
+      <h1 className="font-instrument-serif text-center">
         <span className="text-4xl">Do You Have More</span>
         <span className="text-5xl">
           {" "}
