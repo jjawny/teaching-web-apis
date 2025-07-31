@@ -1,12 +1,12 @@
 /**
  * Invisible filters available via:
- *  - filter-[url('#glow')]
+ *  - filter-[url('#glow-outline')]
  */
 export default function SvgFilters() {
   return (
     <>
       <svg width="0" height="0" area-hidden="true" className="absolute">
-        <filter id="glow">
+        <filter id="glow-outline">
           <feDropShadow
             dx="0"
             dy="0"

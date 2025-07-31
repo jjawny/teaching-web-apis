@@ -8,10 +8,10 @@ import {
   Sedgwick_Ave_Display,
   Syne,
 } from "next/font/google";
+import SvgFilters from "~/client/components/SvgFilters";
 import { ReactQueryProvider } from "~/client/modules/react-query-provider";
 import { UserCtxProvider } from "~/client/modules/user-context/UserCtxProvider";
 
-import SvgFilters from "~/client/components/SvgFilters";
 import "./globals.css";
 
 const cardo = Cardo({
