@@ -2,8 +2,8 @@
 
 import { useSession } from "next-auth/react";
 import { ReactNode, useEffect } from "react";
+import { LoadingPage } from "~/client/components/LoadingPage";
 import { useLoadingProgress } from "./helpers";
-import { LoadingPage } from "./LoadingPage";
 import { userCtx } from "./UserCtx";
 
 /**
