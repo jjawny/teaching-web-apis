@@ -11,6 +11,7 @@ import {
 import { ReactQueryProvider } from "~/client/modules/react-query-provider";
 import { UserCtxProvider } from "~/client/modules/user-context/UserCtxProvider";
 
+import SvgFilters from "~/client/components/SvgFilters";
 import "./globals.css";
 
 const cardo = Cardo({
@@ -64,6 +65,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${cardo.variable} ${sedgwick.variable} ${syne.variable} ${instrumentSerif.variable} antialiased`}
       >
+        <SvgFilters />
         <ReactQueryProvider>
           <SessionProvider refetchInterval={REFRESH_AUTH_INTERVAL}>
             <UserCtxProvider>{children}</UserCtxProvider>
