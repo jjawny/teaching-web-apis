@@ -5,7 +5,7 @@ import Credits from "~/client/components/Credits";
 import Hero from "~/client/components/Hero";
 import { SignInButton } from "~/client/components/auth/SignInButton";
 import { SignOutButton } from "~/client/components/auth/SignOutButton";
-import { userCtx } from "~/client/modules/user-context/UserCtx";
+import { userCtx } from "~/client/modules/user-context";
 import { cn } from "~/client/utils/cn";
 
 export default function Home() {

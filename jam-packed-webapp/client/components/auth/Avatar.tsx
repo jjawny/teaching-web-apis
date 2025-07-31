@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { userCtx } from "~/client/modules/user-context/UserCtx";
+import { userCtx } from "~/client/modules/user-context";
 
 const AVATAR_DIMENSIONS_PX = 25;
 
