@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
-import { Cardo, Geist, Geist_Mono, Sedgwick_Ave_Display, Syne } from "next/font/google";
+import {
+  Cardo,
+  Geist,
+  Geist_Mono,
+  Instrument_Serif,
+  Sedgwick_Ave_Display,
+  Syne,
+} from "next/font/google";
 import { ReactQueryProvider } from "~/client/modules/react-query-provider";
 import { UserCtxProvider } from "~/client/modules/user-context/UserCtxProvider";
 
@@ -22,6 +29,12 @@ const sedgwick = Sedgwick_Ave_Display({
 const syne = Syne({
   variable: "--font-syne",
   subsets: ["latin"],
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 const geistSans = Geist({
@@ -49,7 +62,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${cardo.variable} ${sedgwick.variable} ${syne.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${cardo.variable} ${sedgwick.variable} ${syne.variable} ${instrumentSerif.variable} antialiased`}
       >
         <ReactQueryProvider>
           <SessionProvider refetchInterval={REFRESH_AUTH_INTERVAL}>

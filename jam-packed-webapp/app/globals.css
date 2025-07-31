@@ -21,6 +21,7 @@
   --font-cardo: var(--font-cardo);
   --font-sedgwick: var(--font-sedgwick);
   --font-syne: var(--font-syne);
+  --font-instrument-serif: var(--font-instrument-serif);
   --font-libertinus-mono: var(--font-libertinus-mono);
   --animate-vibrate: vibrate var(--duration, 0.35s) infinite;
 }
