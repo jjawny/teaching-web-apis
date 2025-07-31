@@ -1,12 +1,12 @@
 "use client";
 
+import ControlPanel from "~/client/components/ControlPanel";
 import Credits from "~/client/components/Credits";
 import Hero from "~/client/components/Hero";
-import { SignInButton } from "~/client/components/SignInButton";
-import { SignOutButton } from "~/client/components/SignOutButton";
+import { SignInButton } from "~/client/components/auth/SignInButton";
+import { SignOutButton } from "~/client/components/auth/SignOutButton";
 import { userCtx } from "~/client/modules/user-context/UserCtx";
 import { cn } from "~/client/utils/cn";
-import JobStatus from "~/lib/components/JobStatus";
 
 export default function Home() {
   const { authStatus } = userCtx();
@@ -21,7 +21,7 @@ export default function Home() {
       <main className="row-start-2 flex flex-col items-center gap-[21px] sm:items-start">
         <Hero />
         {authStatus === "authenticated" ? (
-          <JobStatus />
+          <ControlPanel />
         ) : authStatus === "loading" ? (
           <p>Loading...</p>
         ) : (
