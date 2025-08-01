@@ -5,13 +5,6 @@ import { create } from "zustand";
 export type User = Session["user"];
 export type SessionStatus = NonNullable<ReturnType<typeof useSession>["status"]>;
 
-type UserCtx = {
-  user?: User;
-  authStatus: SessionStatus;
-  setUser: (user?: User) => void;
-  setAuthStatus: (userStatus: SessionStatus) => void;
-};
-
 /**
  * - Special Zustand store that centralizes the context for the current user
  * - Why not use NextAuth's session? the goal is to be more dev-friendly + encapsulate
@@ -22,6 +15,13 @@ type UserCtx = {
  *   the Provider will still re-render the entire tree on sign in/out
  * - Name still adheres to hook naming convention (starts with 'use')
  */
+type UserCtx = {
+  user?: User;
+  authStatus: SessionStatus;
+  setUser: (user?: User) => void;
+  setAuthStatus: (userStatus: SessionStatus) => void;
+};
+
 export const userCtx = create<UserCtx>((set, get) => ({
   user: undefined,
   authStatus: "unauthenticated",
