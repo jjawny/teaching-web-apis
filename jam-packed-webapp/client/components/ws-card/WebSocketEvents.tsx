@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp, Circle } from "lucide-react";
 import React from "react";
-import { cn } from "../utils/cn";
+import { cn } from "../../utils/cn";
+import LikeButton from "./SlidingCounter";
 
 export default function WebSocketEvents({
   eventLog,
@@ -56,11 +57,13 @@ export default function WebSocketEvents({
               className="absolute top-0 z-[99999] font-mono text-2xl font-bold tracking-tight whitespace-nowrap text-black/90"
               // style={{ fontFamily: "inherit", letterSpacing: "-0.02em" }}
             >
-              {eventLog.length} WebSocket message{eventLog.length === 1 ? "" : "s"}
+              <LikeButton count={eventLog.length} />
+              WebSocket message
+              {eventLog.length === 1 ? "" : "s"}
             </h2>
             {/* Event log list */}
             <div
-              className="rounded-2xl bg-transparent transition-all duration-500 ease-in-out"
+              className="bg-transparent transition-all duration-500 ease-in-out"
               style={{
                 height: eventLogExpanded ? 120 : 48,
                 overflow: "hidden",
@@ -75,7 +78,7 @@ export default function WebSocketEvents({
                     position: "relative",
                     zIndex: 1,
                     paddingTop: 10,
-                    paddingBottom: 40,
+                    paddingBottom: eventLogExpanded ? 30 : 0,
                     opacity: 0.85,
                   }}
                 >
