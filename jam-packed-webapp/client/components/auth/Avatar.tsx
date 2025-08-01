@@ -17,7 +17,7 @@ export function Avatar() {
         <Image
           priority
           // src={user?.image}
-          src={"/my-pfp-temp-replace-w-google.jpg"}
+          src={"/images/my-pfp-temp-replace-w-google.jpg"}
           alt="Avatar"
           width={AVATAR_DIMENSIONS_PX}
           height={AVATAR_DIMENSIONS_PX}
