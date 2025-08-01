@@ -13,16 +13,27 @@ export default function EventsContainer({
   useEffect(() => {
     if (ulRef.current && eventLog.length > 0) {
       const ul = ulRef.current;
-      const isAtBottom = ul.scrollTop + ul.clientHeight >= ul.scrollHeight - 100; // 100px tolerance
+      const BOTTOM_AREA_THRESHOLD_PX = 100;
+      const isAtBottom =
+        ul.scrollTop + ul.clientHeight >= ul.scrollHeight - BOTTOM_AREA_THRESHOLD_PX;
 
+      // Shrinked: always scroll to collapsed
+      // Expanded: Only scroll to bottom when near bottom
       if (!eventLogExpanded || isAtBottom) {
-        ul.scrollTo({
-          top: ul.scrollHeight,
-          behavior: "smooth",
-        });
+        // Delay the scroll when going from expanded -> collapsed
+        //  to ensure the container has finished transitioning its height
+        const delay_ms = !eventLogExpanded ? 300 : 0;
+
+        setTimeout(() => {
+          ul.scrollTo({
+            top: ul.scrollHeight,
+            behavior: "smooth",
+          });
+        }, delay_ms);
       }
     }
   }, [eventLog, eventLogExpanded]);
+
   return (
     <div className="relative min-h-[100px] flex-1 space-y-3 pt-8">
       <EventsContainerHeader eventsCount={eventLog.length} />
@@ -36,7 +47,7 @@ export default function EventsContainer({
         <div className="relative h-full">
           <ul
             ref={ulRef}
-            className="ml-2 list-none pr-2 font-mono text-[1.15rem] text-gray-700/80"
+            className="ml-2 list-none pr-2 font-mono text-[1.15rem] text-gray-700/80 transition-all duration-500 ease-in-out"
             style={{
               maxHeight: eventLogExpanded ? 120 : 48,
               overflowY: eventLogExpanded ? "auto" : "hidden",
