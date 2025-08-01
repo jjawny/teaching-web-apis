@@ -7,5 +7,5 @@ const (
 	EventPromptPin    = "prompt_pin"
 	EventIncorrectPin = "incorrect_pin"
 	EventCurrentUsers = "current_users"
-	// Job status enum values...
+	// ...Job status enum
 )
