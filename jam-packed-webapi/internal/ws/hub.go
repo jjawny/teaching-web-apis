@@ -43,10 +43,11 @@ func (hub *Hub) run() {
 					}
 				}
 			}
-		case event := <-hub.broadcast:
-			if room, ok := hub.rooms[event.RoomId]; ok {
+			// Capture a broadcast msg to notify user's scoped down
+		case msg := <-hub.broadcast:
+			if room, ok := hub.rooms[msg.RoomId]; ok {
 				for client := range room {
-					if err := client.conn.WriteJSON(event); err != nil {
+					if err := client.conn.WriteJSON(msg); err != nil {
 						client.hub.unregister <- client
 						client.conn.Close()
 					}
@@ -65,14 +66,14 @@ func (hub *Hub) SubscribeWithPin(client *Client, roomId, pin string) error {
 
 		// Room does not exist, require valid 4-digit pin to create
 		if len(pin) != 4 {
-			return fmt.Errorf(EventPromptPin)
+			return fmt.Errorf(BadPin)
 		}
 		hub.rooms[roomId] = make(map[*Client]bool)
 		hub.roomPins[roomId] = pin
 	} else {
 		// Room exists, check pin
 		if hub.roomPins[roomId] != pin {
-			return fmt.Errorf(EventIncorrectPin)
+			return fmt.Errorf(IncorrectPin)
 		}
 	}
 
@@ -97,9 +98,9 @@ func (hub *Hub) Unsubscribe(client *Client, roomId string) {
 	delete(client.roomIds, roomId)
 }
 
-func (hub *Hub) Notify(event Message) {
-	// channel-based concurrency ensures that we can safely broadcast events to all clients in the room
-	hub.broadcast <- event
+func (hub *Hub) Notify(msg Message) {
+	// channel-based concurrency ensures that we can safely broadcast messages to all clients in the room
+	hub.broadcast <- msg
 }
 
 func (hub *Hub) GetRoomUserIDs(roomId string) []User {

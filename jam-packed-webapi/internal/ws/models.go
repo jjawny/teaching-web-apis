@@ -26,7 +26,7 @@ type Message struct {
 	JobId   string `json:"jobId,omitempty"`
 	Details string `json:"details,omitempty"`
 	UserId  string `json:"userId,omitempty"`
-	Event   string `json:"event"`
+	Type    string `json:"type"`
 	Users   []User `json:"users,omitempty"`
 }
 

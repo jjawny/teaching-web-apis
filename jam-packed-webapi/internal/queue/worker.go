@@ -23,7 +23,7 @@ func StartWorker(jobQueue chan Job, resultCache *cache.Cache, wsHub *ws.Hub) {
 		time.Sleep(5000 * time.Millisecond) // sim some latency
 		fakeAura := 10                      // fake aura value
 
-		wsHub.Notify(ws.Message{RoomId: roomID, JobId: jobId, Event: JobStarted, Details: "Started checking aura for " + username})
+		wsHub.Notify(ws.Message{RoomId: roomID, JobId: jobId, Type: ws.JobStarted, Details: "Started checking aura for " + username})
 
 		var attempt int
 		var auraResult int
@@ -51,11 +51,11 @@ func StartWorker(jobQueue chan Job, resultCache *cache.Cache, wsHub *ws.Hub) {
 		// If the room is empty/does not exist the message is dropped
 		if err != nil {
 			jobDetails := "Failed to check aura for " + username + ", reason: " + err.Error()
-			wsHub.Notify(ws.Message{RoomId: roomID, JobId: job.JobId.String(), Event: JobFailed, Details: jobDetails})
+			wsHub.Notify(ws.Message{RoomId: roomID, JobId: job.JobId.String(), Type: ws.JobFailed, Details: jobDetails})
 			log.Printf("[QUEUE WORKER] Failed to process job: %v", err)
 		} else {
 			jobDetails := username + " has " + strconv.Itoa(fakeAura) + "x more aura"
-			wsHub.Notify(ws.Message{RoomId: roomID, JobId: job.JobId.String(), Event: JobSucceeded, Details: jobDetails})
+			wsHub.Notify(ws.Message{RoomId: roomID, JobId: job.JobId.String(), Type: ws.JobSucceeded, Details: jobDetails})
 			log.Printf("[QUEUE WORKER] Successfully processed job: %v", job.JobId)
 		}
 	}

@@ -48,6 +48,8 @@ func ServeWS(hub *Hub) gin.HandlerFunc {
 			return
 		}
 
+		// Here, the user is authenticated and the websocket connection is established
+		// This sends a connected(TODO: confirm?) event, the user is NOT subscribed to any rooms yet for notifications
 		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 		if err != nil {
 			return
@@ -69,28 +71,28 @@ func ServeWS(hub *Hub) gin.HandlerFunc {
 					// Notify the specific user trying to connect (private message)
 					client.conn.WriteJSON(Message{
 						RoomId:  msg.RoomId,
-						Event:   err.Error(),
+						Type:    err.Error(),
 						Details: "Failed to join room",
 					})
 					continue
 				}
-				// Broadcast join event to all users
+				// Broadcast join message to all users
 				currentUsers := hub.GetRoomUserIDs(msg.RoomId)
 				hub.Notify(Message{
 					RoomId:  msg.RoomId,
-					UserId:  client.username,
-					Event:   "user_joined",
-					Details: fmt.Sprintf("User %s joined room %s", client.username, msg.RoomName),
+					UserId:  client.userId,
+					Type:    "user_joined",
+					Details: fmt.Sprintf("'%s' has entered the room", client.username),
 					Users:   currentUsers,
 				})
 			case ActionUnsubscribe:
 				hub.Unsubscribe(client, msg.RoomId)
-				// Broadcast leave event to all users
+				// Broadcast leave message to all users
 				hub.Notify(Message{
 					RoomId:  msg.RoomId,
-					UserId:  client.username,
-					Event:   "user_left",
-					Details: fmt.Sprintf("User %s left job %s", client.username, msg.RoomName),
+					UserId:  client.userId,
+					Type:    "user_left",
+					Details: fmt.Sprintf("'%s' has left the room", client.username),
 				})
 			}
 		}
