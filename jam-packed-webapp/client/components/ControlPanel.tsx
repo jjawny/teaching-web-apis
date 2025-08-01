@@ -1,12 +1,10 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useJobWebSocket } from "~/client/hooks/useJobWebSocket";
 import WsCard from "./ws-card/WsCard";
 
 export default function ControlPanel() {
-  const { data: session } = useSession();
   const [token, setToken] = useState<string | null>(null);
 
   // Fetch NextAuth JWT from API route on first mount
@@ -28,7 +26,7 @@ export default function ControlPanel() {
   const [httpStatus, setHttpStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [httpError, setHttpError] = useState<string | null>(null);
   const [query, setQuery] = useState("madman");
-  const { message, connected, isPromptForPin } = useJobWebSocket(roomId, token, pin);
+  const { message, isConnected, isPromptForPin } = useJobWebSocket(roomId, token, pin);
   const [eventLogExpanded, setEventLogExpanded] = useState(false);
 
   useEffect(() => {
@@ -80,7 +78,6 @@ export default function ControlPanel() {
 
   return (
     <div className="mx-auto max-w-xl p-4">
-      <h1 className="mb-2 text-xl font-bold">Job Status</h1>
       <div className="mb-2">
         <input
           value={query}
@@ -106,10 +103,10 @@ export default function ControlPanel() {
       )}
       <button
         onClick={handleJoinRoom}
-        disabled={connected}
+        disabled={isConnected}
         className="mb-4 rounded border bg-blue-500 px-4 py-2 text-white"
         style={{
-          opacity: connected ? 0.5 : 1,
+          opacity: isConnected ? 0.5 : 1,
         }}
       >
         Join room
@@ -125,14 +122,7 @@ export default function ControlPanel() {
         <strong>HTTP Status:</strong> {httpStatus}
         {httpError && <span className="ml-2 text-red-500">{httpError}</span>}
       </div>
-      <div className="mb-2">
-        <strong>WebSocket:</strong>{" "}
-        {connected ? (
-          <span className="text-green-600">Connected</span>
-        ) : (
-          <span className="text-yellow-600">Disconnected</span>
-        )}
-      </div>
+
       {roomId && (
         <div className="mb-2">
           <strong>Room ID:</strong> {roomId}
@@ -143,12 +133,6 @@ export default function ControlPanel() {
         eventLogExpanded={eventLogExpanded}
         setEventLogExpanded={setEventLogExpanded}
       />
-      <div className="mb-2">
-        <strong>Last Raw WebSocket Message:</strong>
-        <pre className="rounded bg-gray-100 p-2 text-xs">
-          {message ? JSON.stringify(message, null, 2) : "No message"}
-        </pre>
-      </div>
     </div>
   );
 }
