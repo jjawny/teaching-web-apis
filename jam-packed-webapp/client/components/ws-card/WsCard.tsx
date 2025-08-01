@@ -1,9 +1,9 @@
 import { ChevronDown, ChevronUp, Circle } from "lucide-react";
 import React from "react";
-import { cn } from "../../utils/cn";
-import LikeButton from "./SlidingCounter";
+import { cn } from "~/client/utils/cn";
+import EventsContainer from "./WsCardEventsContainer";
 
-export default function WebSocketEvents({
+export default function WsCard({
   eventLog,
   eventLogExpanded,
   setEventLogExpanded,
@@ -24,55 +24,9 @@ export default function WebSocketEvents({
         )}
       >
         <Overlays />
-
-        {/* Content */}
         <div className="relative flex items-center px-8 pt-5">
-          <ListeningToEventsPulse className="mr-6" />
-
-          {/* Main content */}
-          <div className="relative min-h-[100px] flex-1 space-y-3 pt-8">
-            {/* Header */}
-            <h2
-              className="absolute top-0 z-[99999] font-mono text-2xl font-bold tracking-tight whitespace-nowrap text-black/90"
-              // style={{ fontFamily: "inherit", letterSpacing: "-0.02em" }}
-            >
-              <LikeButton count={eventLog.length} />
-              WebSocket message
-              {eventLog.length === 1 ? "" : "s"}
-            </h2>
-            {/* Event log list */}
-            <div
-              className="bg-transparent transition-all duration-500 ease-in-out"
-              style={{
-                height: eventLogExpanded ? 120 : 48,
-                overflow: "hidden",
-              }}
-            >
-              <div className="relative h-full">
-                <ul
-                  className="ml-2 list-none pr-2 font-mono text-[1.15rem] text-gray-700/80"
-                  style={{
-                    maxHeight: eventLogExpanded ? 120 : 48,
-                    overflowY: "auto",
-                    position: "relative",
-                    zIndex: 1,
-                    paddingTop: 10,
-                    paddingBottom: eventLogExpanded ? 30 : 0,
-                    opacity: 0.85,
-                  }}
-                >
-                  {eventLog.length === 0 && <li className="text-gray-400">No events yet</li>}
-                  {eventLog.map((evt, i) => (
-                    <li key={i} className="mb-1">
-                      <span className="font-bold text-blue-500">[{evt.event}]</span>{" "}
-                      {evt.details && <span className="text-blue-300">{evt.details}</span>}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
+          <ListeningToEventsIcon className="mr-6" />
+          <EventsContainer eventLog={eventLog} eventLogExpanded={eventLogExpanded} />
           <ToggleExpandIcon isExpanded={eventLogExpanded} />
         </div>
       </div>
@@ -115,7 +69,7 @@ function Overlays() {
   );
 }
 
-function ListeningToEventsPulse({ className }: { className?: string }) {
+function ListeningToEventsIcon({ className }: { className?: string }) {
   return (
     <div className={cn(className, "flex-shrink-0")}>
       <Circle className="h-6 w-6 animate-ping text-cyan-400/60" strokeWidth={3} />
