@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useJobWebSocket } from "~/client/hooks/useJobWebSocket";
+import WebSocketEvents from "./WebSocketEvents";
 
 export default function ControlPanel() {
   const { data: session } = useSession();
@@ -28,6 +29,7 @@ export default function ControlPanel() {
   const [httpError, setHttpError] = useState<string | null>(null);
   const [query, setQuery] = useState("madman");
   const { message, connected, isPromptForPin } = useJobWebSocket(roomId, token, pin);
+  const [eventLogExpanded, setEventLogExpanded] = useState(false);
 
   useEffect(() => {
     const lastStatus = eventLog.length ? eventLog[eventLog.length - 1]?.status : null;
@@ -136,18 +138,11 @@ export default function ControlPanel() {
           <strong>Room ID:</strong> {roomId}
         </div>
       )}
-      <div className="mb-2">
-        <strong>Event Log:</strong>
-        <ul className="ml-6 list-disc">
-          {eventLog.length === 0 && <li>No events yet</li>}
-          {eventLog.map((evt, i) => (
-            <li key={i}>
-              [{evt.event}] <b>{evt.event}</b>
-              {evt.details && <>: {evt.details}</>}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <WebSocketEvents
+        eventLog={eventLog}
+        eventLogExpanded={eventLogExpanded}
+        setEventLogExpanded={setEventLogExpanded}
+      />
       <div className="mb-2">
         <strong>Last Raw WebSocket Message:</strong>
         <pre className="rounded bg-gray-100 p-2 text-xs">
