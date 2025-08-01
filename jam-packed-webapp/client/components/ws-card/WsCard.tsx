@@ -1,7 +1,13 @@
-import { ChevronDown, ChevronUp, Circle } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, CircleIcon, UnplugIcon } from "lucide-react";
 import React from "react";
+import { useWsCtx } from "~/client/hooks/useWsCtx";
 import { cn } from "~/client/utils/cn";
 import EventsContainer from "./WsCardEventsContainer";
+
+const CONNECTED_BG =
+  "bg-gradient-to-br from-cyan-100/50 via-cyan-200/80 to-cyan-100/20 backdrop-blur-xl";
+const DISCONNECTED_BG =
+  "bg-gradient-to-br from-stone-100/50 via-stone-200/80 to-stone-100/20 backdrop-blur-xl";
 
 export default function WsCard({
   eventLog,
@@ -12,15 +18,18 @@ export default function WsCard({
   eventLogExpanded: boolean;
   setEventLogExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const isConnected = useWsCtx((ctx) => ctx.isConnected);
+
   return (
     <div className="mx-auto w-[500px] p-4">
       <div
         onClick={() => setEventLogExpanded((v) => !v)}
         className={cn(
           "relative", // for overlays
-          "border border-blue-100",
+          "border",
+          isConnected ? "border-cyan-300" : "border-stone-300",
           "cursor-pointer overflow-hidden rounded-[2.5rem] select-none",
-          "bg-gradient-to-br from-cyan-100/50 via-cyan-200/80 to-cyan-100/20 backdrop-blur-xl",
+          isConnected ? CONNECTED_BG : DISCONNECTED_BG,
         )}
       >
         <Overlays />
@@ -70,9 +79,15 @@ function Overlays() {
 }
 
 function ListeningToEventsIcon({ className }: { className?: string }) {
+  const isConnected = useWsCtx((ctx) => ctx.isConnected);
+
   return (
-    <div className={cn(className, "flex-shrink-0")}>
-      <Circle className="h-6 w-6 animate-ping text-cyan-400/60" strokeWidth={3} />
+    <div className={cn(className, "z-50 flex-shrink-0")}>
+      {isConnected ? (
+        <CircleIcon className="h-6 w-6 animate-ping text-cyan-400/60" strokeWidth={3} />
+      ) : (
+        <UnplugIcon className="h-6 w-6 animate-pulse text-stone-400/60" strokeWidth={3} />
+      )}
     </div>
   );
 }
@@ -81,9 +96,9 @@ function ToggleExpandIcon({ isExpanded, className }: { isExpanded: boolean; clas
   return (
     <div className={cn(className, "flex-shrink-0")}>
       {isExpanded ? (
-        <ChevronUp className="h-10 w-10 text-black/20" strokeWidth={2} />
+        <ChevronUpIcon className="h-10 w-10 text-black/20" strokeWidth={2} />
       ) : (
-        <ChevronDown className="h-10 w-10 text-black/40" strokeWidth={2} />
+        <ChevronDownIcon className="h-10 w-10 text-black/40" strokeWidth={2} />
       )}
     </div>
   );

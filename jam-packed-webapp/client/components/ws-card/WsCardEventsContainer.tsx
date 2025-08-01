@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { useWsCtx } from "~/client/hooks/useWsCtx";
+import { cn } from "~/client/utils/cn";
 import SlidingCounter from "../SlidingCounter";
 
 export default function EventsContainer({
@@ -81,10 +83,15 @@ function EventsContainerHeader({ eventsCount }: { eventsCount: number }) {
 }
 
 function Event({ className, evt, i }: { className?: string; evt: any; i: number }) {
+  const isConnected = useWsCtx((ctx) => ctx.isConnected);
   return (
     <li key={i} className="mb-1">
-      <span className="font-bold text-blue-500">[{evt.event}]</span>{" "}
-      {evt.details && <span className="text-blue-300">{evt.details}</span>}
+      <span className={cn("font-bold", isConnected ? "text-blue-500" : "text-stone-500")}>
+        [{evt.event}]
+      </span>{" "}
+      {evt.details && (
+        <span className={cn(isConnected ? "text-blue-300" : "text-stone-300")}>{evt.details}</span>
+      )}
     </li>
   );
 }
