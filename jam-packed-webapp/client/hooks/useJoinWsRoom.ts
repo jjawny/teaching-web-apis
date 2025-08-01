@@ -3,7 +3,7 @@ import { WsMessageType } from "../enums/ws-message-type";
 import { userCtx } from "../modules/user-context";
 import { useWsCtx } from "./useWsCtx";
 
-export function useJobWebSocket(roomId: string | null, token: string | null, maxRetries = 3) {
+export function useJoinWsRoom(roomId: string | null, token: string | null, maxRetries = 3) {
   const user = userCtx((ctx) => ctx.user);
   const setWsReadyState = useWsCtx((ctx) => ctx.setWsReadyState);
   const setError = useWsCtx((ctx) => ctx.setError);

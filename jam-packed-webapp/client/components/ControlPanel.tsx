@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useJobWebSocket } from "~/client/hooks/useJobWebSocket";
+import { useJoinWsRoom } from "~/client/hooks/useJoinWsRoom";
 import { useWsCtx } from "../hooks/useWsCtx";
 import WsCard from "./ws-card/WsCard";
 
@@ -15,7 +15,7 @@ export default function ControlPanel() {
   const wsError = useWsCtx((ctx) => ctx.error);
 
   const setPinInStore = useWsCtx((ctx) => ctx.setPin);
-  const { isPromptForPin, rejoinWithPin } = useJobWebSocket(roomId, token); // No need to pass pin anymore
+  const { isPromptForPin, rejoinWithPin } = useJoinWsRoom(roomId, token); // No need to pass pin anymore
   const [messagesExpanded, setMessagesExpanded] = useState(false);
 
   // Fetch NextAuth JWT from API route on first mount
