@@ -30,12 +30,10 @@ export default function EventsContainer({
               opacity: 0.85,
             }}
           >
+            {/* TODO: use an eventID as the key */}
             {eventLog.length === 0 && <li className="text-gray-400">No events yet</li>}
             {eventLog.map((evt, i) => (
-              <li key={i} className="mb-1">
-                <span className="font-bold text-blue-500">[{evt.event}]</span>{" "}
-                {evt.details && <span className="text-blue-300">{evt.details}</span>}
-              </li>
+              <Event key={i} evt={evt} i={i} />
             ))}
           </ul>
         </div>
@@ -51,5 +49,14 @@ function EventsContainerHeader({ eventsCount }: { eventsCount: number }) {
       WebSocket message
       {eventsCount === 1 ? "" : "s"}
     </h2>
+  );
+}
+
+function Event({ className, evt, i }: { className?: string; evt: any; i: number }) {
+  return (
+    <li key={i} className="mb-1">
+      <span className="font-bold text-blue-500">[{evt.event}]</span>{" "}
+      {evt.details && <span className="text-blue-300">{evt.details}</span>}
+    </li>
   );
 }
