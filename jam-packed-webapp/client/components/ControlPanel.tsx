@@ -2,10 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useJobWebSocket } from "~/client/hooks/useJobWebSocket";
+import { useWsCtx } from "../hooks/useWsCtx";
 import WsCard from "./ws-card/WsCard";
 
 export default function ControlPanel() {
   const [token, setToken] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState<string | null>(null);
+  const [processing, setProcessing] = useState<boolean>(false);
+  const [httpStatus, setHttpStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [httpError, setHttpError] = useState<string | null>(null);
+  const [query, setQuery] = useState("madman");
+  const wsError = useWsCtx((ctx) => ctx.error);
+
+  const setPinInStore = useWsCtx((ctx) => ctx.setPin);
+  const { isPromptForPin, rejoinWithPin } = useJobWebSocket(roomId, token); // No need to pass pin anymore
+  const [messagesExpanded, setMessagesExpanded] = useState(false);
 
   // Fetch NextAuth JWT from API route on first mount
   useEffect(() => {
@@ -17,31 +28,12 @@ export default function ControlPanel() {
       setToken(data.jwt ?? null);
     }
     fetchWebApiToken();
-  }, []);
 
-  const [roomId, setRoomId] = useState<string | null>(null);
-  const [pin, setPin] = useState<string | null>(null);
-  const [processing, setProcessing] = useState<boolean>(false);
-  const [eventLog, setEventLog] = useState<any[]>([]);
-  const [httpStatus, setHttpStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [httpError, setHttpError] = useState<string | null>(null);
-  const [query, setQuery] = useState("madman");
-  const { message, isConnected, isPromptForPin } = useJobWebSocket(roomId, token, pin);
-  const [eventLogExpanded, setEventLogExpanded] = useState(false);
-
-  useEffect(() => {
-    const lastStatus = eventLog.length ? eventLog[eventLog.length - 1]?.status : null;
-    if (message && lastStatus !== message.event) {
-      setEventLog((log) => [...log, { ...message, time: new Date().toLocaleTimeString() }]);
-    }
-  }, [message]);
-
-  const handleJoinRoom = () => {
+    // set a random room ID to create a room (in other apps, we'd actually let the user choose this/control the rooms, for here we just subscribe to a random room)
     const newRoomId = crypto.randomUUID();
     setRoomId(newRoomId);
-    setEventLog([]);
     // triggers custom hook to join the WebSocket room
-  };
+  }, []);
 
   const handleStart = async () => {
     setProcessing(true);
@@ -94,23 +86,20 @@ export default function ControlPanel() {
           className="mb-2 rounded border px-2 py-1"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              // Handle PIN submission logic here
-              console.log("PIN submitted:", e.currentTarget.value);
-              setPin(e.currentTarget.value);
+              const pinValue = e.currentTarget.value;
+              console.log("PIN submitted:", pinValue);
+              setPinInStore(pinValue);
+              rejoinWithPin(pinValue);
             }
           }}
         />
       )}
-      <button
-        onClick={handleJoinRoom}
-        disabled={isConnected}
-        className="mb-4 rounded border bg-blue-500 px-4 py-2 text-white"
-        style={{
-          opacity: isConnected ? 0.5 : 1,
-        }}
-      >
-        Join room
-      </button>
+      {wsError && (
+        <div className="mb-2 text-red-500">
+          <strong>ws Error:</strong> {wsError}
+        </div>
+      )}
+
       <button
         onClick={handleStart}
         disabled={processing}
@@ -123,16 +112,7 @@ export default function ControlPanel() {
         {httpError && <span className="ml-2 text-red-500">{httpError}</span>}
       </div>
 
-      {roomId && (
-        <div className="mb-2">
-          <strong>Room ID:</strong> {roomId}
-        </div>
-      )}
-      <WsCard
-        eventLog={eventLog}
-        eventLogExpanded={eventLogExpanded}
-        setEventLogExpanded={setEventLogExpanded}
-      />
+      <WsCard messagesExpanded={messagesExpanded} setMessagesExpanded={setMessagesExpanded} />
     </div>
   );
 }
