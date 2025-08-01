@@ -1,4 +1,5 @@
-import LikeButton from "../SlidingCounter";
+import { useEffect, useRef } from "react";
+import SlidingCounter from "../SlidingCounter";
 
 export default function EventsContainer({
   eventLog,
@@ -7,6 +8,21 @@ export default function EventsContainer({
   eventLog: any[];
   eventLogExpanded: boolean;
 }) {
+  const ulRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    if (ulRef.current && eventLog.length > 0) {
+      const ul = ulRef.current;
+      const isAtBottom = ul.scrollTop + ul.clientHeight >= ul.scrollHeight - 100; // 100px tolerance
+
+      if (!eventLogExpanded || isAtBottom) {
+        ul.scrollTo({
+          top: ul.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [eventLog, eventLogExpanded]);
   return (
     <div className="relative min-h-[100px] flex-1 space-y-3 pt-8">
       <EventsContainerHeader eventsCount={eventLog.length} />
@@ -19,10 +35,11 @@ export default function EventsContainer({
       >
         <div className="relative h-full">
           <ul
+            ref={ulRef}
             className="ml-2 list-none pr-2 font-mono text-[1.15rem] text-gray-700/80"
             style={{
               maxHeight: eventLogExpanded ? 120 : 48,
-              overflowY: "auto",
+              overflowY: eventLogExpanded ? "auto" : "hidden",
               position: "relative",
               zIndex: 1,
               paddingTop: 10,
@@ -45,7 +62,7 @@ export default function EventsContainer({
 function EventsContainerHeader({ eventsCount }: { eventsCount: number }) {
   return (
     <h2 className="absolute top-0 z-[99999] font-mono text-2xl font-bold tracking-tight whitespace-nowrap text-black/90">
-      <LikeButton count={eventsCount} />
+      <SlidingCounter className="pl-0!" count={eventsCount} />
       WebSocket message
       {eventsCount === 1 ? "" : "s"}
     </h2>

@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useJobWebSocket } from "~/client/hooks/useJobWebSocket";
-import WebSocketEvents from "./WebSocketEvents";
+import WsCard from "./ws-card/WsCard";
 
 export default function ControlPanel() {
   const { data: session } = useSession();
@@ -138,7 +138,7 @@ export default function ControlPanel() {
           <strong>Room ID:</strong> {roomId}
         </div>
       )}
-      <WebSocketEvents
+      <WsCard
         eventLog={eventLog}
         eventLogExpanded={eventLogExpanded}
         setEventLogExpanded={setEventLogExpanded}
