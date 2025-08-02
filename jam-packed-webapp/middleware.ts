@@ -1,15 +1,16 @@
 import NextAuth from "next-auth";
 import { MiddlewareConfig, NextResponse } from "next/server";
 import { authConfig } from "./shared/auth";
-import { HOME_ROUTE, LOGIN_ROUTE } from "./shared/constants";
+import { ANON_ROUTES, HOME_ROUTE, LOGIN_ROUTE } from "./shared/constants";
 
 const { auth } = NextAuth(authConfig);
 
 export default auth(async function middleware(request) {
   const isOnLoginPage = request.nextUrl.pathname.startsWith(LOGIN_ROUTE);
+  const isOnAnonRoute = ANON_ROUTES.some((route) => request.nextUrl.pathname.startsWith(route));
   const isAuthenticated = request.auth;
 
-  if (!isAuthenticated && !isOnLoginPage) {
+  if (!isAuthenticated && !isOnAnonRoute) {
     return NextResponse.redirect(new URL(LOGIN_ROUTE, request.nextUrl.origin));
   }
 
