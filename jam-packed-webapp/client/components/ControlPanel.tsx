@@ -33,8 +33,8 @@ export default function ControlPanel() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-xl">
-      <TimelineBar />
+    <div className="mx-auto flex max-w-xl flex-col items-center">
+      <TimelineBar className="mb-4" />
       <MainTextField
         isPromptForPin={isPromptForPin}
         rejoinWithPin={rejoinWithPin}

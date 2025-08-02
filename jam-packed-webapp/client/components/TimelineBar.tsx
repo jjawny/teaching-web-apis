@@ -9,7 +9,13 @@ const BAR_HEIGHT_PX = 20;
 const TICK_WIDTH_PX = 5;
 const TIMELINE_DURATION_MS = 5000; // ttsf (time-til-slide-off)
 
-export default function TimelineBar({ isDebugging = false }: { isDebugging?: boolean }) {
+export default function TimelineBar({
+  isDebugging = false,
+  className,
+}: {
+  isDebugging?: boolean;
+  className?: string;
+}) {
   const [now, setNow] = useState(Date.now());
   const ticks = useTimelineCtx((ctx) => ctx.ticks);
   const animationRef = useRef<number | null>(null);
@@ -36,7 +42,7 @@ export default function TimelineBar({ isDebugging = false }: { isDebugging?: boo
   });
 
   return (
-    <div>
+    <div className={className}>
       {isDebugging && <TestStampingOnTimeline />}
 
       <div
