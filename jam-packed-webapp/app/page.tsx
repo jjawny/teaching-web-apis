@@ -24,6 +24,7 @@ export default function Home() {
         {userStatus === "authenticated" ? <ControlPanel /> : <p>Loading...</p>}
       </main>
       <SignOutButton className="absolute top-0 right-0 pt-4 pr-6" />
+      {/* TODO: move to layout wrapping component */}
       <Credits className="absolute bottom-0 left-0 pb-4 pl-6" />
     </div>
   );

@@ -15,6 +15,7 @@ export default function ControlPanel() {
 
   // Fetch NextAuth JWT from API route on first mount
   useEffect(() => {
+    // TODO: move this and setstte into other usequery hooks that require it
     async function fetchWebApiToken() {
       const res = await fetch("/api/get-webapi-token", {
         credentials: "include",
