@@ -29,7 +29,7 @@ export default function Pin({
   const ariaInvalidLabel = hasError ? "true" : "false";
 
   return (
-    <>
+    <div>
       <InputOTP
         maxLength={4}
         pattern={REGEXP_ONLY_DIGITS}
@@ -46,14 +46,18 @@ export default function Pin({
         </InputOTPGroup>
       </InputOTP>
       <HelperText pinHelperText={pinHelperText} />
-    </>
+    </div>
   );
 }
 
 function HelperText({ pinHelperText }: { pinHelperText?: PinHelperText }) {
   if (pinHelperText?.errorText) {
-    return <span className="pt-2 text-red-500">{pinHelperText.errorText}</span>;
+    return <span className="block pt-2 text-center text-red-500">{pinHelperText.errorText}</span>;
   }
 
-  return <span className="pt-2 opacity-50">{pinHelperText?.helperText ?? "\u200B"}</span>;
+  return (
+    <span className="block pt-2 text-center opacity-50">
+      {pinHelperText?.helperText ?? "\u200B"}
+    </span>
+  );
 }
