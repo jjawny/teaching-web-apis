@@ -1,5 +1,5 @@
 export type Tick = {
   id: number;
   timestamp: number;
-  type: "basic" | "click" | "ws";
+  type: "basic" | "click" | "http" | "ws";
 };

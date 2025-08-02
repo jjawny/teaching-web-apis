@@ -1,4 +1,4 @@
-import { MessageCircleIcon, PointerIcon, RectangleVerticalIcon } from "lucide-react";
+import { MessageCircleIcon, PointerIcon, RectangleVerticalIcon, SendIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTimelineCtx } from "~/client/hooks/useTimelineCtx";
 import { Tick } from "~/client/models/tick";
@@ -56,32 +56,30 @@ function TickStamp({ tick, now }: { tick: Tick; now: number }) {
   const progress = elapsed / TIMELINE_DURATION_MS;
   const left = BAR_WIDTH_PX * (1 - progress);
 
-  if (tick.type === "basic") {
+  if (tick.type !== "basic") {
     return (
       <div
-        className="absolute top-0 bottom-0 bg-stone-200"
+        className="absolute top-0 bottom-0 flex h-full items-center justify-center"
         style={{
           left,
-          width: TICK_WIDTH_PX,
+          width: ICON_SIZE_PX,
         }}
-      />
+      >
+        {tick.type === "click" && <PointerIcon size={ICON_SIZE_PX} />}
+        {tick.type === "http" && <SendIcon size={ICON_SIZE_PX} />}
+        {tick.type === "ws" && <MessageCircleIcon size={ICON_SIZE_PX} />}
+      </div>
     );
   }
 
   return (
     <div
-      className="absolute top-0 bottom-0 flex h-full items-center justify-center"
+      className="absolute top-0 bottom-0 bg-stone-200"
       style={{
         left,
-        width: ICON_SIZE_PX,
+        width: TICK_WIDTH_PX,
       }}
-    >
-      {tick.type === "click" ? (
-        <PointerIcon size={ICON_SIZE_PX} />
-      ) : (
-        <MessageCircleIcon size={ICON_SIZE_PX} />
-      )}
-    </div>
+    />
   );
 }
 
