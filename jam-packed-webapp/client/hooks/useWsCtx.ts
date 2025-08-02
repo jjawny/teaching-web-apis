@@ -16,12 +16,14 @@ type WsCtx = {
   roomId?: string;
   roomName?: string;
   pin?: string; // for quick re-auto-joins TODO: in local storage
+  pinError?: string;
+  wsError?: string;
   messages: WsMessage[];
-  error?: string;
-  addMessage: (message: WsMessage) => void;
-  setError: (error?: string) => void;
-  setWsReadyState: (readyState: WebSocket["readyState"]) => void;
   setPin: (pin: string) => void;
+  setPinError: (pinError?: string) => void;
+  setWsError: (wsError?: string) => void;
+  setWsReadyState: (readyState: WebSocket["readyState"]) => void;
+  addMessage: (message: WsMessage) => void;
   joinRoom: (roomId: string, roomName: string, pin?: string) => void;
   leaveRoom: () => void;
 };
@@ -32,19 +34,23 @@ export const useWsCtx = create<WsCtx>((set, get) => ({
   roomId: undefined,
   roomName: undefined,
   pin: undefined,
-  error: undefined,
+  pinError: undefined,
+  wsError: undefined,
   messages: [],
-  addMessage: (message: WsMessage) => {
-    set((state) => ({ messages: [...(state.messages ?? []), message] }));
+  setPin: (pin: string) => {
+    set({ pin: pin });
+  },
+  setPinError: (error?: string) => {
+    set({ pinError: error });
   },
   setWsReadyState: (readyState: WebSocket["readyState"]) => {
     set({ wsReadyState: readyState });
   },
-  setError: (error?: string) => {
-    set({ error: error });
+  setWsError: (error?: string) => {
+    set({ wsError: error });
   },
-  setPin: (pin: string) => {
-    set({ pin: pin });
+  addMessage: (message: WsMessage) => {
+    set((state) => ({ messages: [...(state.messages ?? []), message] }));
   },
   joinRoom: (roomId, roomName, pin) => {
     console.debug("joining room", roomId);
@@ -55,7 +61,7 @@ export const useWsCtx = create<WsCtx>((set, get) => ({
       roomId,
       roomName,
       pin: pin !== undefined ? pin : state.pin, // Keep existing PIN if none provided
-      error: undefined,
+      wsError: undefined,
       messages: isRejoining ? state.messages : [],
     }));
   },
