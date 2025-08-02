@@ -19,6 +19,8 @@ const DISCONNECTED_BG =
   "bg-gradient-to-br from-stone-100/50 via-stone-200/80 to-stone-100/20 backdrop-blur-xl";
 const TRANSITIONING_BG =
   "bg-gradient-to-br from-amber-100/50 via-amber-200/80 to-amber-100/20 backdrop-blur-xl";
+const WS_ERROR_BG =
+  "bg-gradient-to-br from-red-100/50 via-red-200/80 to-red-100/20 backdrop-blur-xl";
 
 // Hook for cycling through wifi icons during transitioning states
 function useTransitioningIcon() {
@@ -37,7 +39,11 @@ function useTransitioningIcon() {
 }
 
 // Get background and border styles based on connection state
-function getConnectionStyles(readyState: number, hasJoinedRoom: boolean) {
+function getConnectionStyles(readyState: number, hasJoinedRoom: boolean, wsError?: string) {
+  if (wsError) {
+    return [WS_ERROR_BG, "border-red-300"];
+  }
+
   switch (readyState) {
     case WebSocket.OPEN:
       return [CONNECTED_BG, "border-cyan-300"];
@@ -59,8 +65,9 @@ export default function WsCard({
 }) {
   const readyStatus = useWsCtx((ctx) => ctx.wsReadyState);
   const hasJoinedRoom = useWsCtx((ctx) => ctx.hasJoinedRoom);
+  const wsError = useWsCtx((ctx) => ctx.wsError);
 
-  const [backgroundStyle, borderStyle] = getConnectionStyles(readyStatus, hasJoinedRoom);
+  const [backgroundStyle, borderStyle] = getConnectionStyles(readyStatus, hasJoinedRoom, wsError);
 
   return (
     <div className="mx-auto w-[500px] p-4">
@@ -166,13 +173,25 @@ function ToggleExpandIcon({ isExpanded, className }: { isExpanded: boolean; clas
 
 function RoomSubtext() {
   const hasJoinedRoom = useWsCtx((ctx) => ctx.hasJoinedRoom);
+  const wsReadyState = useWsCtx((ctx) => ctx.wsReadyState);
   const roomName = useWsCtx((ctx) => ctx.roomName);
+  const wsError = useWsCtx((ctx) => ctx.wsError);
 
-  if (!hasJoinedRoom) return null;
+  if (wsError) {
+    return (
+      <div className="pt-2 text-center text-red-500">
+        <strong>Error:</strong> {wsError}
+      </div>
+    );
+  }
 
-  return (
-    <div className="pt-2 text-center text-stone-300">
-      <strong>Joined:</strong> {roomName ?? "Unnamed Room"}
-    </div>
-  );
+  if (hasJoinedRoom && wsReadyState === WebSocket.OPEN) {
+    return (
+      <div className="pt-2 text-center text-stone-300">
+        <strong>Joined:</strong> {roomName ?? "Unnamed Room"}
+      </div>
+    );
+  }
+
+  return null;
 }

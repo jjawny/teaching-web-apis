@@ -85,7 +85,9 @@ function ContainerHeader({ messagesCount }: { messagesCount: number }) {
 }
 
 function Message({ className, evt, i }: { className?: string; evt: any; i: number }) {
-  const isConnected = useWsCtx((ctx) => ctx.hasJoinedRoom);
+  const hasJoinedRoom = useWsCtx((ctx) => ctx.hasJoinedRoom);
+  const wsReadyState = useWsCtx((ctx) => ctx.wsReadyState);
+  const isConnected = wsReadyState === WebSocket.OPEN && hasJoinedRoom;
 
   return (
     <li key={i} className="mb-1">
