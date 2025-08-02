@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { auth } from "~/app/api/auth/[...nextauth]/route";
+import { CUSTOM_JWT_EXPIRY_MS } from "~/shared/constants";
 var jwt = require("jsonwebtoken");
 
 // #AUTH
@@ -19,6 +20,9 @@ var jwt = require("jsonwebtoken");
 //  This essentially turns our webapp into a BFF (Backend for Frontend) which handles our OAuth flow
 //    before giving users access to the webapi
 //  TODO: Enhancement is to store the JWT so we can revoke upon sign out etc
+
+const CUSTOM_JWT_EXPIRY_S = Math.floor(CUSTOM_JWT_EXPIRY_MS / 1000);
+
 export async function GET(req: NextRequest) {
   // Check RBAC here etc
   const session = await auth();
@@ -30,8 +34,9 @@ export async function GET(req: NextRequest) {
     username: session.user?.name,
     avatar: session.user?.image,
   };
+
   const webapiJwt = jwt.sign(claims, process.env.CUSTOM_JWT_SECRET!, {
-    expiresIn: "5m",
+    expiresIn: CUSTOM_JWT_EXPIRY_S,
   });
 
   return Response.json({ jwt: webapiJwt });
