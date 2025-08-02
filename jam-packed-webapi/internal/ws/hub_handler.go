@@ -20,7 +20,9 @@ const (
 	ActionUnsubscribe = "unsubscribe"
 )
 
-// TODO: example passcode on frontend to join the room?
+// TODO: Disconnect clients:
+//   - After X minutes of inactivity
+//   - Periodically to ensure token still valid
 func ServeWS(hub *Hub) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tokenString := ctx.Query("token")
