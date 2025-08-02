@@ -33,8 +33,8 @@ export default function ControlPanel() {
   }, []);
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col items-center">
-      <TimelineBar className="mb-4" />
+    <>
+      <TimelineBar />
       <MainTextField
         isPromptForPin={isPromptForPin}
         rejoinWithPin={rejoinWithPin}
@@ -43,6 +43,6 @@ export default function ControlPanel() {
       />
 
       <WsCard messagesExpanded={messagesExpanded} setMessagesExpanded={setMessagesExpanded} />
-    </div>
+    </>
   );
 }
