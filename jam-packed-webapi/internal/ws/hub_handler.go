@@ -70,8 +70,9 @@ func ServeWS(hub *Hub) gin.HandlerFunc {
 				if err := hub.SubscribeWithPin(client, msg.RoomId, msg.Pin); err != nil {
 					// Notify the specific user trying to connect (private message)
 					client.conn.WriteJSON(Message{
-						RoomId:  msg.RoomId,
-						Type:    err.Error(),
+						RoomId: msg.RoomId,
+						Type:   err.Error(),
+						// TODO: the details should be explicit and descriptive based on the error like bad_pin has "Please supply a new 4-digit pin"
 						Details: "Failed to join room",
 					})
 					continue
