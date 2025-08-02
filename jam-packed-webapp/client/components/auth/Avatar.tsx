@@ -39,7 +39,7 @@ function InitialsAvatar({ name }: { name?: string }) {
 
   return (
     <div
-      className="flex items-center justify-center rounded-full font-bold select-none"
+      className="font-syne flex items-center justify-center rounded-full font-bold select-none"
       style={{
         width: AVATAR_DIMENSIONS_PX,
         height: AVATAR_DIMENSIONS_PX,
