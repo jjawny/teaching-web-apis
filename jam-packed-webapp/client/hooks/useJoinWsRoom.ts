@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { WsMessageType } from "~/client/enums/ws-message-type";
 import { userCtx } from "~/client/modules/user-context";
 import { clientEnv } from "~/shared/modules/env";
+import { useHealthCheckQuery } from "./useHealthCheckQuery";
 import { useTimelineCtx } from "./useTimelineCtx";
 import { useWsCtx } from "./useWsCtx";
 
@@ -15,6 +16,7 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
   const storedPin = useWsCtx((ctx) => ctx.pin);
   const addTick = useTimelineCtx((ctx) => ctx.addTick);
   const setPinError = useWsCtx((ctx) => ctx.setPinError);
+  const { data: isApiOnline } = useHealthCheckQuery();
 
   const [isPromptForPin, setIsPromptForPin] = useState<boolean>(false);
   const retryCount = useRef(0);
@@ -24,7 +26,7 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
   // Function to attempt joining a room (separate from connection)
   const attemptJoinRoom = useCallback(
     (pin?: string) => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && roomId) {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         console.debug("Attempting to join room with PIN:", pin || "none");
         wsRef.current.send(
           JSON.stringify({
@@ -35,13 +37,15 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
           }),
         );
       } else {
-        console.warn("WebSocket not ready for room join attempt");
+        console.warn("WebSocket not ready for room join attempt, try connecting first");
+        connect();
       }
     },
     [roomId],
   );
 
   const connect = useCallback(() => {
+    if (!isApiOnline) return;
     console.debug("establishing websocket connection");
 
     // Don't close existing connection - just return if already connected
@@ -181,7 +185,7 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
         }
       }
     };
-  }, [token, roomId, maxRetries]);
+  }, [token, roomId, maxRetries, isApiOnline]);
 
   // Function to rejoin with new PIN without creating new connection
   const rejoinWithPin = useCallback(
@@ -208,7 +212,7 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
       }
       hasAttemptedInitialJoin.current = false;
     };
-  }, [roomId, token]); // Removed connect and disconnect from dependencies
+  }, [roomId, token]);
 
   return { isPromptForPin, rejoinWithPin };
 }
