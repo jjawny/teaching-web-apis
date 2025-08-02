@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { WsMessageType } from "../enums/ws-message-type";
 import { userCtx } from "../modules/user-context";
+import { useTimelineCtx } from "./useTimelineCtx";
 import { useWsCtx } from "./useWsCtx";
 
 export function useJoinWsRoom(roomId: string | null, token: string | null, maxRetries = 3) {
@@ -11,6 +12,7 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
   const joinRoom = useWsCtx((ctx) => ctx.joinRoom);
   const leaveRoom = useWsCtx((ctx) => ctx.leaveRoom);
   const storedPin = useWsCtx((ctx) => ctx.pin);
+  const addTick = useTimelineCtx((ctx) => ctx.addTick);
 
   const [isPromptForPin, setIsPromptForPin] = useState<boolean>(false);
   const retryCount = useRef(0);
@@ -144,6 +146,8 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
           return;
         }
 
+        // Here we can capture the message in our local state
+
         // Successfully joined room
         if (data.type === WsMessageType.USER_JOINED && data.userId === user?.id) {
           joinRoom(data.roomId, "Johnny's room", undefined);
@@ -151,16 +155,15 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
           setIsPromptForPin(false);
           setError(undefined);
           addMessage(data);
+          addTick("ws");
           return;
         }
 
-        // If we're already in the room, just add the message
-        // Get fresh state from store instead of using stale closure
         // Only add messages for the current room
-        // TODO: remove this logic, the component rendering should filter based on the current room ID (so all messages are in the store just not shown)
         if (data.roomId === roomId) {
           console.debug("Adding message for current room:", roomId);
           addMessage(data);
+          addTick("ws");
         } else {
           console.debug("Ignoring message for different room:", data.roomId, "vs current:", roomId);
         }
