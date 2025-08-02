@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
+import SlidingCounter from "~/client/components/SlidingCounter";
 import { useWsCtx } from "~/client/hooks/useWsCtx";
 import { cn } from "~/client/utils/cn";
-import SlidingCounter from "../SlidingCounter";
 
 export default function WsCardMessagesContainer({
   messagesExpanded,
@@ -86,6 +86,7 @@ function ContainerHeader({ messagesCount }: { messagesCount: number }) {
 
 function Message({ className, evt, i }: { className?: string; evt: any; i: number }) {
   const isConnected = useWsCtx((ctx) => ctx.hasJoinedRoom);
+
   return (
     <li key={i} className="mb-1">
       <span className={cn("font-bold", isConnected ? "text-blue-500" : "text-stone-500")}>
