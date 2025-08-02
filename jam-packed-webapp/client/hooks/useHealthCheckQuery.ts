@@ -5,7 +5,7 @@ export function useHealthCheckQuery() {
   return useQuery<boolean>({
     queryKey: ["health-check"],
     queryFn: async () => {
-      const res = await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_URL}/api/health`);
+      const res = await fetch(clientEnv.NEXT_PUBLIC_BACKEND_URL);
       return res.ok;
     },
     staleTime: 0, // always stale; no caching
