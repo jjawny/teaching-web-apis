@@ -3,32 +3,29 @@ import { useSession } from "next-auth/react";
 import { create } from "zustand";
 
 export type User = Session["user"];
-export type SessionStatus = NonNullable<ReturnType<typeof useSession>["status"]>;
+export type UserStatus = NonNullable<ReturnType<typeof useSession>["status"]>;
 
 /**
- * - Special Zustand store that centralizes the context for the current user
- * - Why not use NextAuth's session? the goal is to be more dev-friendly + encapsulate
- *   more properties into a 'user' object
- * - Reminder: this Zustand stores become singletons upon first access
- * - Why not use a React Context? We use a React Context Provider to init the store,
- *   and use a Zustand store to avoid frequent changes causing entire vDOM tree to re-render,
- *   the Provider will still re-render the entire tree on sign in/out
- * - Name still adheres to hook naming convention (starts with 'use')
+ * BUNDLES/encapsulates/centralizes all context for the current user.
+ * This minimizes the dependency on NextAuth (useSession called once in <UserCtxProvider>, rest of codebase uses `userCtx`).
+ * This allows for easy refactoring/smaller blast radius of code changes if we switch auth packages (BetterAuth?).
+ * Name still adheres to hook naming convention (starts with 'use').
+ * Why not store the custom JWT here? this is short-lived and frequently refetched, just use RQ cache.
  */
 type UserCtx = {
   user?: User;
-  authStatus: SessionStatus;
+  userStatus: UserStatus;
   setUser: (user?: User) => void;
-  setAuthStatus: (userStatus: SessionStatus) => void;
+  setUserStatus: (status: UserStatus) => void;
 };
 
 export const userCtx = create<UserCtx>((set, get) => ({
   user: undefined,
-  authStatus: "unauthenticated",
+  userStatus: "unauthenticated",
   setUser: (user?: User) => {
     set({ user: user });
   },
-  setAuthStatus: (userStatus: SessionStatus) => {
-    set({ authStatus: userStatus });
+  setUserStatus: (status: UserStatus) => {
+    set({ userStatus: status });
   },
 }));
