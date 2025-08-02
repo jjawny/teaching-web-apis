@@ -1,18 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { WsMessageType } from "../enums/ws-message-type";
-import { userCtx } from "../modules/user-context";
+import { WsMessageType } from "~/client/enums/ws-message-type";
+import { userCtx } from "~/client/modules/user-context";
+import { clientEnv } from "~/shared/modules/env";
 import { useTimelineCtx } from "./useTimelineCtx";
 import { useWsCtx } from "./useWsCtx";
 
 export function useJoinWsRoom(roomId: string | null, token: string | null, maxRetries = 3) {
   const user = userCtx((ctx) => ctx.user);
   const setWsReadyState = useWsCtx((ctx) => ctx.setWsReadyState);
-  const setError = useWsCtx((ctx) => ctx.setError);
+  const setWsError = useWsCtx((ctx) => ctx.setWsError);
   const addMessage = useWsCtx((ctx) => ctx.addMessage);
   const joinRoom = useWsCtx((ctx) => ctx.joinRoom);
   const leaveRoom = useWsCtx((ctx) => ctx.leaveRoom);
   const storedPin = useWsCtx((ctx) => ctx.pin);
   const addTick = useTimelineCtx((ctx) => ctx.addTick);
+  const setPinError = useWsCtx((ctx) => ctx.setPinError);
 
   const [isPromptForPin, setIsPromptForPin] = useState<boolean>(false);
   const retryCount = useRef(0);
@@ -53,8 +55,9 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
       wsRef.current.close();
     }
 
-    // TODO: extract url to env
-    const ws = new WebSocket(`ws://localhost:8080/ws?token=${token}`);
+    const backendUrl = clientEnv.NEXT_PUBLIC_BACKEND_URL;
+    const wsUrl = backendUrl.replace(/^http/, "ws") + `/ws?token=${token}`;
+    const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = (e) => {
@@ -82,7 +85,7 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
     ws.onerror = (e) => {
       console.error("WebSocket error:", e);
       setWsReadyState(ws.readyState);
-      setError("Experiencing connection issues");
+      setWsError("Experiencing connection issues");
     };
 
     const reconnect = () => {
@@ -124,25 +127,29 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
         const data = JSON.parse(e.data);
         console.debug("Received WebSocket message:", data);
 
+        setWsError(undefined); // all good?
+        setPinError(undefined); // all good?
+
         // Handle room joining responses directly here
         if (data.type === WsMessageType.BAD_PIN) {
           console.warn("PIN required to join room");
           setIsPromptForPin(true);
-          setError(undefined);
+          setPinError(data.details);
           return;
         }
 
         if (data.type === WsMessageType.INCORRECT_PIN) {
           console.warn("Invalid PIN provided");
           setIsPromptForPin(true);
-          setError("Invalid PIN");
+          setPinError(data.details);
           return;
         }
 
         // Handle other room errors (max rooms, room full, etc.)
+        // detect these not just failed to join room
         if (data.details && data.details.includes("Failed to join room")) {
           console.warn("Failed to join room:", data.type);
-          setError(`Room error: ${data.type}`);
+          setPinError(data.details);
           return;
         }
 
@@ -153,7 +160,6 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
           joinRoom(data.roomId, "Johnny's room", undefined);
           console.log("Successfully joined room");
           setIsPromptForPin(false);
-          setError(undefined);
           addMessage(data);
           addTick("ws");
           return;
@@ -171,7 +177,7 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
         console.warn("Failed to parse WebSocket message:", error);
         const errorMessage = error instanceof Error ? error.message : "Unexpected error";
         if (error instanceof Error) {
-          setError(errorMessage);
+          setWsError(errorMessage);
         }
       }
     };
