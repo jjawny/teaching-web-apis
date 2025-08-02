@@ -77,7 +77,7 @@ export default function MainTextField({
         />
       )}
       {!hasJoinedRoom && !isPromptForPin && (
-        <Loader2Icon className="h-12 w-12 animate-spin text-blue-500" strokeWidth={3} />
+        <Loader2Icon className="h-12 w-12 animate-spin text-cyan-300" strokeWidth={3} />
       )}
       {hasJoinedRoom && (
         <>
