@@ -6,12 +6,13 @@ import { userCtx } from "~/client/modules/user-context";
 const AVATAR_DIMENSIONS_PX = 25;
 
 export function Avatar() {
-  const { user, authStatus } = userCtx();
+  const user = userCtx((ctx) => ctx.user);
+  const userStatus = userCtx((ctx) => ctx.userStatus);
 
   // if (authStatus === "loading")
   // return <TODO: mini loader size={AVATAR_DIMENSIONS_PX} />;
-  if (authStatus === "unauthenticated") return <></>;
-  if (authStatus === "authenticated") {
+  if (userStatus === "unauthenticated") return <></>;
+  if (userStatus === "authenticated") {
     if (user?.image) {
       return (
         <Image
