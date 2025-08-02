@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useJoinWsRoom } from "~/client/hooks/useJoinWsRoom";
 import { useWsCtx } from "../hooks/useWsCtx";
+import TimelineBar from "./TimelineBar";
 import WsCard from "./ws-card/WsCard";
 
 export default function ControlPanel() {
@@ -69,7 +70,8 @@ export default function ControlPanel() {
   };
 
   return (
-    <div className="mx-auto max-w-xl p-4">
+    <div className="mx-auto max-w-xl">
+      <TimelineBar />
       <div className="mb-2">
         <input
           value={query}
