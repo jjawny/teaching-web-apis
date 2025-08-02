@@ -70,7 +70,7 @@ export default function WsCard({
   const [backgroundStyle, borderStyle] = getConnectionStyles(readyStatus, hasJoinedRoom, wsError);
 
   return (
-    <div className="mx-auto w-[500px] p-4">
+    <div className="mx-auto w-[500px]">
       <div
         onClick={() => setMessagesExpanded((v) => !v)}
         className={cn(
