@@ -15,7 +15,7 @@ type WsCtx = {
   hasJoinedRoom: boolean;
   roomId?: string;
   roomName?: string;
-  pin?: string; // for quick re-auto-joins TODO:
+  pin?: string; // for quick re-auto-joins TODO: in local storage
   messages: WsMessage[];
   error?: string;
   addMessage: (message: WsMessage) => void;
