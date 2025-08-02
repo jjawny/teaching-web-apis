@@ -4,7 +4,7 @@ import Image from "next/image";
 import { userCtx } from "~/client/modules/user-context";
 import { getContrastTextColor, getFontSize, getInitials, stringToHexColor } from "./helpers";
 
-const AVATAR_DIMENSIONS_PX = 25;
+const AVATAR_DIMENSIONS_PX = 30;
 
 export function Avatar() {
   const user = userCtx((ctx) => ctx.user);
