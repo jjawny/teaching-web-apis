@@ -30,6 +30,7 @@ export default function Pin({
   const ariaInvalidLabel = hasError ? "true" : "false";
   const hasMounted = useRef<boolean>(false);
   const [isPlayShakeAnimation, setIsPlayShakeAnimation] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(
     function completeOnMount() {
@@ -46,12 +47,16 @@ export default function Pin({
       if (value.length === 4 && hasError) {
         setIsPlayShakeAnimation(true);
 
-        const timeout = setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
           setIsPlayShakeAnimation(false);
         }, 300);
-
-        return () => clearTimeout(timeout);
       }
+      return () => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
+      };
     },
     [value, hasError, setIsPlayShakeAnimation],
   );
