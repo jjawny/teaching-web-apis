@@ -10,6 +10,7 @@ import {
   Sedgwick_Ave_Display,
   Syne,
 } from "next/font/google";
+import Debug from "~/client/components/Debug";
 import SvgFilters from "~/client/components/SvgFilters";
 import { ReactQueryProvider } from "~/client/modules/react-query-provider";
 import { UserCtxProvider } from "~/client/modules/user-context";
@@ -65,6 +66,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${cardo.variable} ${sedgwick.variable} ${syne.variable} ${instrumentSerif.variable} antialiased`}
       >
+        <Debug />
         <SvgFilters />
         <ReactQueryProvider>
           <SessionProvider refetchInterval={REFRESH_AUTH_INTERVAL}>
