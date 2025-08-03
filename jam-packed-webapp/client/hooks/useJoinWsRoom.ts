@@ -29,8 +29,7 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
   const setIsPendingPinUser = useWsCtx((ctx) => ctx.setIsPendingPinFromUser);
 
   const addTick = useTimelineCtx((ctx) => ctx.addTick);
-  const { refetch: refetchJamPackedWebApiToken, error: jamPackedWebApiTokenError } =
-    useGetJamPackedWebApiToken();
+  const { refetch: refetchJamPackedWebApiToken, error: tokenError } = useGetJamPackedWebApiToken();
   const { data: isJamPackedWebApiHealthy, error: jamPackedWebApiError } =
     useJamPackedWebApiHealthCheckQuery();
 
@@ -261,14 +260,14 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
   );
 
   useEffect(() => {
-    if (jamPackedWebApiTokenError) {
-      toast.error(jamPackedWebApiTokenError.message);
+    if (tokenError) {
+      toast.error(tokenError.message);
     }
 
     if (jamPackedWebApiError) {
       toast.error(jamPackedWebApiError.message);
     }
-  }, [jamPackedWebApiTokenError, jamPackedWebApiError]);
+  }, [tokenError, jamPackedWebApiError]);
 
   useEffect(() => {
     if (isReady && isJamPackedWebApiHealthy && !hasAttemptedToConnect.current) {
