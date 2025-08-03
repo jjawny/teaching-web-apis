@@ -76,11 +76,7 @@ export default function MainTextField({
   const isConnecting = wsReadyState === WebSocket.CONNECTING;
 
   if (isConnecting || isJoiningRoom || isAttemptingToConnect) {
-    return (
-      <>
-        <Loader2Icon className="h-12 w-12 animate-spin text-cyan-300" strokeWidth={3} />;
-      </>
-    );
+    return <Loader2Icon className="h-12 w-12 animate-spin text-cyan-300" strokeWidth={3} />;
   }
 
   if (isConnected && !hasJoinedRoom && isPendingPinFromUser) {
@@ -127,22 +123,10 @@ export default function MainTextField({
   }
 
   return (
-    <>
-      <div className="flex flex-col items-center justify-center">
-        <p className="text-red-500">Not connected from WebSocket</p>
-        <Button
-          onClick={() => reConnectAndJoinWithPin(roomId ?? "", pin ?? "")}
-          className="mt-2 rounded bg-blue-500 px-4 py-2 text-white"
-        >
-          Reconnect
-        </Button>
-      </div>
-
-      <p>
-        {isConnecting ? "isConnecting true" : "isConnecting false"} -{" "}
-        {isJoiningRoom ? "isJoiningRoom true" : "isJoiningRoom false"} -
-        {isAttemptingToConnect ? "isAttemptingToConnect true" : "isAttemptingToConnect false"}
-      </p>
-    </>
+    <div className="flex flex-col items-center justify-center">
+      <Button onClick={() => reConnectAndJoinWithPin(roomId ?? "", pin ?? "")} className="mt-2">
+        Reconnect
+      </Button>
+    </div>
   );
 }
