@@ -11,15 +11,15 @@ import MainTextField from "./MainTextField";
 export default function MainContent() {
   const { reConnectAndJoinWithPin } = useJoinWsRoom(true);
 
-  const roomPinError = useWsCtx((ctx) => ctx.pinError);
-  const pin = useWsCtx((ctx) => ctx.roomPin);
-  const hasJoinedRoom = useWsCtx((ctx) => ctx.hasJoinedRoom);
+  const wsReadyState = useWsCtx((ctx) => ctx.wsReadyState);
   const isAttemptingToConnect = useWsCtx((ctx) => ctx.isAttemptingToConnect);
   const isJoiningRoom = useWsCtx((ctx) => ctx.isJoiningRoom);
-  const isPendingPinFromUser = useWsCtx((ctx) => ctx.isPendingPinFromUser);
-  const setPin = useWsCtx((ctx) => ctx.setRoomPin);
-  const wsReadyState = useWsCtx((ctx) => ctx.wsReadyState);
+  const hasJoinedRoom = useWsCtx((ctx) => ctx.hasJoinedRoom);
+  const isPendingPinFromUser = useWsCtx((ctx) => ctx.isPendingRoomPinFromUser);
+  const roomPinError = useWsCtx((ctx) => ctx.pinError);
+  const roomPin = useWsCtx((ctx) => ctx.roomPin);
   const roomId = useWsCtx((ctx) => ctx.roomId);
+  const setRoomPin = useWsCtx((ctx) => ctx.setRoomPin);
 
   const isConnected = wsReadyState === WebSocket.OPEN;
   const isConnecting = wsReadyState === WebSocket.CONNECTING;
@@ -31,10 +31,10 @@ export default function MainContent() {
   if (isConnected && !hasJoinedRoom && isPendingPinFromUser) {
     return (
       <Pin
-        value={pin ?? ""}
+        value={roomPin ?? ""}
         pinHelperText={{ helper: "Create a new room", error: roomPinError }}
         onChange={(pin) => {
-          setPin(pin);
+          setRoomPin(pin);
         }}
         onComplete={(pin) => {
           console.debug("PIN submitted:", pin);
@@ -54,7 +54,7 @@ export default function MainContent() {
   }
 
   return (
-    <Button onClick={() => reConnectAndJoinWithPin(roomId ?? "", pin ?? "")} className="mt-2">
+    <Button onClick={() => reConnectAndJoinWithPin(roomId ?? "", roomPin ?? "")} className="mt-2">
       Reconnect
     </Button>
   );

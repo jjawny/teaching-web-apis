@@ -26,7 +26,7 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
   const setRoomPin = useWsCtx((ctx) => ctx.setRoomPin);
   const setRoomPinError = useWsCtx((ctx) => ctx.setRoomPinError);
   const setIsJoiningRoom = useWsCtx((ctx) => ctx.setIsJoiningRoom);
-  const setIsPendingPinUser = useWsCtx((ctx) => ctx.setIsPendingPinFromUser);
+  const setIsPendingPinUser = useWsCtx((ctx) => ctx.setIsPendingRoomPinFromUser);
 
   const addTick = useTimelineCtx((ctx) => ctx.addTick);
   const { refetch: refetchJamPackedWebApiToken, error: tokenError } = useGetJamPackedWebApiToken();

@@ -13,10 +13,10 @@ import { WsMessage } from "~/client/models/ws-message";
 type WsCtx = {
   // Statuses
   wsReadyState: WebSocket["readyState"]; // CONNECTING, OPEN, CLOSING, CLOSED
-  isJoiningRoom: boolean;
-  isPendingPinFromUser: boolean;
-  hasJoinedRoom: boolean;
   isAttemptingToConnect: boolean;
+  isPendingRoomPinFromUser: boolean;
+  isJoiningRoom: boolean;
+  hasJoinedRoom: boolean;
   // Room
   roomId?: string;
   roomName?: string;
@@ -34,7 +34,7 @@ type WsCtx = {
   setWsReadyState: (readyState: WebSocket["readyState"]) => void;
   setRoomId: (roomId: string) => void;
   setIsJoiningRoom: (isJoining: boolean) => void;
-  setIsPendingPinFromUser: (isPending: boolean) => void;
+  setIsPendingRoomPinFromUser: (isPending: boolean) => void;
   addMessage: (message: WsMessage) => void;
   joinedRoom: (roomId: string, roomName: string, pin?: string) => void;
   leftRoom: () => void;
@@ -43,9 +43,9 @@ type WsCtx = {
 
 export const useWsCtx = create<WsCtx>((set, get) => ({
   wsReadyState: WebSocket.CLOSED,
-  isJoiningRoom: false,
-  isPendingPinFromUser: false,
   isAttemptingToConnect: false,
+  isPendingRoomPinFromUser: false,
+  isJoiningRoom: false,
   hasJoinedRoom: false,
   // For this demo, simply create a random new room
   // In a real app, we'd let the user choose/control their rooms
@@ -62,7 +62,7 @@ export const useWsCtx = create<WsCtx>((set, get) => ({
   setWsError: (error) => set({ wsError: error }),
   setRoomId: (roomId) => set({ roomId }),
   setIsJoiningRoom: (isJoining) => set({ isJoiningRoom: isJoining }),
-  setIsPendingPinFromUser: (isPending) => set({ isPendingPinFromUser: isPending }),
+  setIsPendingRoomPinFromUser: (isPending) => set({ isPendingRoomPinFromUser: isPending }),
   addMessage: (message) => set((state) => ({ messages: [...(state.messages ?? []), message] })),
   joinedRoom: (roomId, roomName, pin) => {
     console.debug("joining room", roomId);
