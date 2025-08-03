@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTimelineCtx } from "~/client/hooks/useTimelineCtx";
 import { Tick } from "~/client/models/tick";
 
-const BAR_WIDTH_PX = 370;
+const BAR_WIDTH_PX = 420;
 const ICON_SIZE_PX = 15;
 const BAR_HEIGHT_PX = 20;
 const TICK_WIDTH_PX = 5;
