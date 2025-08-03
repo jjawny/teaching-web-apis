@@ -17,6 +17,7 @@ type UserCtx = {
   userStatus: UserStatus;
   setUser: (user?: User) => void;
   setUserStatus: (status: UserStatus) => void;
+  getDebugDump: () => object;
 };
 
 export const userCtx = create<UserCtx>((set, get) => ({
@@ -27,5 +28,9 @@ export const userCtx = create<UserCtx>((set, get) => ({
   },
   setUserStatus: (status: UserStatus) => {
     set({ userStatus: status });
+  },
+  getDebugDump: () => {
+    const state = get();
+    return Object.fromEntries(Object.entries(state).filter(([_, v]) => typeof v !== "function"));
   },
 }));
