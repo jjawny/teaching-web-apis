@@ -1,51 +1,59 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { WsMessageType } from "~/client/enums/ws-message-type";
-import { userCtx } from "~/client/modules/user-context";
 import { clientEnv } from "~/shared/modules/env";
-import { useHealthCheckQuery } from "./useHealthCheckQuery";
+import { userCtx } from "../modules/user-context";
+import { useGetAndRefreshCustomJwt } from "./useFetchApiToken";
+import { useExtApiHealthCheckQuery } from "./useHealthCheckQuery";
 import { useTimelineCtx } from "./useTimelineCtx";
 import { useWsCtx } from "./useWsCtx";
 
-export function useJoinWsRoom(roomId: string | null, token: string | null, maxRetries = 3) {
-  const user = userCtx((ctx) => ctx.user);
+/**
+ * TODO: gpt ascii for this and put it into the README, also this is outdated, redo it
+ * A re/fetch for the health check triggers -> connecting -> triggers join room
+ *                                              |-> fails and closes or just closes -> loop back and connect w exponential backoff
+ * A rejoin will either trigger the join room if already connected (skips to final step) otherwise call connect again which will repeat scenario #1...
+ *
+ */
+export function useJoinWsRoom(isReady = false, maxRetries = 3) {
   const setWsReadyState = useWsCtx((ctx) => ctx.setWsReadyState);
   const setWsError = useWsCtx((ctx) => ctx.setWsError);
+  const joinedRoom = useWsCtx((ctx) => ctx.joinedRoom);
+  const leftRoom = useWsCtx((ctx) => ctx.leftRoom);
   const addMessage = useWsCtx((ctx) => ctx.addMessage);
-  const joinRoom = useWsCtx((ctx) => ctx.joinRoom);
-  const leaveRoom = useWsCtx((ctx) => ctx.leaveRoom);
-  const storedPin = useWsCtx((ctx) => ctx.pin);
+  const setRoomId = useWsCtx((ctx) => ctx.setRoomId);
+  const setIsAttemptingToConnect = useWsCtx((ctx) => ctx.setIsAttemptingToConnect);
+  const setRoomPin = useWsCtx((ctx) => ctx.setRoomPin);
+  const setRoomPinError = useWsCtx((ctx) => ctx.setRoomPinError);
+  const setIsJoiningRoom = useWsCtx((ctx) => ctx.setIsJoiningRoom);
+  const setIsPendingPinUser = useWsCtx((ctx) => ctx.setIsPendingPinFromUser);
+
   const addTick = useTimelineCtx((ctx) => ctx.addTick);
-  const setPinError = useWsCtx((ctx) => ctx.setPinError);
-  const { data: isApiOnline } = useHealthCheckQuery();
+  const { refetch: refetchAndRefreshCustomJwt, error: getTokenError } = useGetAndRefreshCustomJwt();
+  const { data: isExtApiHealthy, error: extApiHealthCheckError } = useExtApiHealthCheckQuery();
 
-  const [isPromptForPin, setIsPromptForPin] = useState<boolean>(false);
   const retryCount = useRef(0);
+  const hasAttemptedToConnect = useRef(false);
   const wsRef = useRef<WebSocket | null>(null);
-  const hasAttemptedInitialJoin = useRef(false);
 
-  // Function to attempt joining a room (separate from connection)
-  const attemptJoinRoom = useCallback(
-    (pin?: string) => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        console.debug("Attempting to join room with PIN:", pin || "none");
-        wsRef.current.send(
-          JSON.stringify({
-            action: "subscribe",
-            roomId: roomId,
-            roomName: "Johnny's room",
-            pin: pin || "", // Send empty string if no pin
-          }),
-        );
+  const connect = useCallback(async () => {
+    const reconnect = () => {
+      if (retryCount.current < maxRetries) {
+        const delay = Math.min(1000 * 2 ** retryCount.current, 30000);
+        retryCount.current += 1;
+        console.log(`Reconnect attempt ${retryCount.current} in ${delay}ms`);
+        setTimeout(() => {
+          connect();
+        }, delay);
       } else {
-        console.warn("WebSocket not ready for room join attempt, try connecting first");
-        connect();
+        setIsAttemptingToConnect(false);
+        console.log("Do not retry WebSocket");
+        retryCount.current = 0;
       }
-    },
-    [roomId],
-  );
+    };
 
-  const connect = useCallback(() => {
-    if (!isApiOnline) return;
+    setIsAttemptingToConnect(true);
+
     console.debug("establishing websocket connection");
 
     // Don't close existing connection - just return if already connected
@@ -54,33 +62,61 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
       return;
     }
 
+    if (wsRef.current && wsRef.current.readyState === WebSocket.CONNECTING) {
+      console.debug("WebSocket already connecting");
+      return;
+    }
+
     // Close any existing connection that's not open
     if (wsRef.current) {
       wsRef.current.close();
     }
 
+    console.debug("Creating new websocket connection");
+
+    const token = await refetchAndRefreshCustomJwt();
+
+    if (token.error) {
+      console.warn("No token available, cannot connect to WebSocket");
+      setWsError("Unable to connect: No valid token, reason:" + token.error);
+      return;
+    }
+
+    if (!token.data) {
+      console.warn("No token available, cannot connect to WebSocket");
+      setWsError("Unable to connect: No valid token");
+      return;
+    }
+
     const backendUrl = clientEnv.NEXT_PUBLIC_BACKEND_URL;
-    const wsUrl = backendUrl.replace(/^http/, "ws") + `/ws?token=${token}`;
+    const wsUrl = backendUrl.replace(/^http/, "ws") + `/ws?token=${token.data}`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = (e) => {
       setWsReadyState(ws.readyState);
       retryCount.current = 0;
-      console.debug("WebSocket connected");
+      setIsAttemptingToConnect(false);
 
-      // Only attempt initial join once per connection
-      if (!hasAttemptedInitialJoin.current && roomId) {
-        hasAttemptedInitialJoin.current = true;
-        // Try to join with stored PIN if available, otherwise with no PIN
-        const currentPin = storedPin || "";
-        console.debug("Attempting to join room with PIN:", currentPin || "none");
+      console.debug("WebSocket connected");
+      setWsError(undefined); // Clear any previous connection errors
+
+      // Try to join with stored PIN if available, otherwise with no PIN
+
+      const roomId = useWsCtx.getState().roomId;
+      const roomPin = useWsCtx.getState().roomPin;
+
+      if (roomId) {
+        setIsJoiningRoom(true);
+        setIsPendingPinUser(false);
+        console.debug(`Attempting to join room ${roomId} with PIN:`, roomPin || "none");
+
         ws.send(
           JSON.stringify({
             action: "subscribe",
             roomId: roomId,
-            roomName: "Johnny's room",
-            pin: currentPin,
+            roomName: "Johnny's room", // TODO: this should be in the message as a prop
+            pin: roomPin,
           }),
         );
       }
@@ -92,25 +128,11 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
       setWsError("Experiencing connection issues");
     };
 
-    const reconnect = () => {
-      if (retryCount.current < maxRetries) {
-        const delay = Math.min(1000 * 2 ** retryCount.current, 30000);
-        retryCount.current += 1;
-        console.log(`Reconnect attempt ${retryCount.current} in ${delay}ms`);
-        setTimeout(() => {
-          hasAttemptedInitialJoin.current = false; // Reset for retry
-          connect();
-        }, delay);
-      } else {
-        console.log("Do not retry WebSocket");
-        leaveRoom();
-        hasAttemptedInitialJoin.current = false;
-      }
-    };
-
     ws.onclose = (e) => {
       console.debug("WebSocket closed:", e.code, e.reason);
       setWsReadyState(ws.readyState);
+      leftRoom();
+
       const clean = e.wasClean ?? false;
       const code = e.code;
       const nonRetryable = code === 1000 || code === 1001;
@@ -120,8 +142,6 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
         reconnect();
       } else {
         console.log("Do not retry WebSocket");
-        leaveRoom();
-        hasAttemptedInitialJoin.current = false;
       }
     };
 
@@ -132,20 +152,22 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
         console.debug("Received WebSocket message:", data);
 
         setWsError(undefined); // all good?
-        setPinError(undefined); // all good?
+        setRoomPinError(undefined); // all good?
 
         // Handle room joining responses directly here
         if (data.type === WsMessageType.BAD_PIN) {
           console.warn("PIN required to join room");
-          setIsPromptForPin(true);
-          setPinError(data.details);
+          setRoomPinError(data.details);
+          setIsJoiningRoom(false);
+          setIsPendingPinUser(true);
           return;
         }
 
         if (data.type === WsMessageType.INCORRECT_PIN) {
           console.warn("Invalid PIN provided");
-          setIsPromptForPin(true);
-          setPinError(data.details);
+          setRoomPinError(data.details);
+          setIsJoiningRoom(false);
+          setIsPendingPinUser(true);
           return;
         }
 
@@ -153,23 +175,30 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
         // detect these not just failed to join room
         if (data.details && data.details.includes("Failed to join room")) {
           console.warn("Failed to join room:", data.type);
-          setPinError(data.details);
+          setRoomPinError(data.details);
+          setIsJoiningRoom(false);
+          setIsPendingPinUser(false);
           return;
         }
 
         // Here we can capture the message in our local state
 
         // Successfully joined room
-        if (data.type === WsMessageType.USER_JOINED && data.userId === user?.id) {
-          joinRoom(data.roomId, "Johnny's room", undefined);
+
+        const currentUserId = userCtx.getState().user?.id;
+        if (data.type === WsMessageType.USER_JOINED && data.userId === currentUserId) {
+          joinedRoom(data.roomId, "Johnny's room", undefined);
           console.log("Successfully joined room");
-          setIsPromptForPin(false);
           addMessage(data);
           addTick("ws");
+          setIsJoiningRoom(false);
+          setIsPendingPinUser(false);
           return;
         }
 
         // Only add messages for the current room
+        const roomId = useWsCtx.getState().roomId;
+
         if (data.roomId === roomId) {
           console.debug("Adding message for current room:", roomId);
           addMessage(data);
@@ -185,34 +214,76 @@ export function useJoinWsRoom(roomId: string | null, token: string | null, maxRe
         }
       }
     };
-  }, [token, roomId, maxRetries, isApiOnline]);
+  }, [
+    maxRetries,
+    isExtApiHealthy,
+    setIsPendingPinUser,
+    setIsJoiningRoom,
+    joinedRoom,
+    addMessage,
+    addTick,
+    setWsError,
+    setRoomPinError,
+    setIsAttemptingToConnect,
+  ]);
 
-  // Function to rejoin with new PIN without creating new connection
-  const rejoinWithPin = useCallback(
-    (newPin: string) => {
+  // Function to attempt joining a room (separate from connection)
+  const reConnectAndJoinWithPin = useCallback(
+    async (newRoomId: string, newPin: string) => {
       console.debug("Rejoining room with new PIN:", newPin);
-      attemptJoinRoom(newPin);
+      setRoomId(newRoomId);
+      setRoomPin(newPin); // future rejoins
+
+      // already connected, send join message
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        console.debug(`Attempting to join room ${newRoomId} with PIN:`, newPin || "none");
+        setIsJoiningRoom(true);
+        setIsPendingPinUser(false);
+        wsRef.current.send(
+          JSON.stringify({
+            action: "subscribe",
+            roomId: newRoomId,
+            roomName: "Johnny's room",
+            pin: newPin,
+          }),
+        );
+        // not connected, connect (will trigger a join in onopen)
+      } else {
+        console.warn(
+          "WebSocket not ready for room join attempt, now trying to connect first which will retry join upon onopen",
+        );
+        connect();
+      }
     },
-    [attemptJoinRoom],
+    [setRoomId, setRoomPin, connect, setIsJoiningRoom, setIsPendingPinUser],
   );
 
-  // reconnect when roomid or token changes, but NOT when pin changes
   useEffect(() => {
-    if (!roomId || !token) {
-      return;
+    if (getTokenError) {
+      toast.error(getTokenError.message);
     }
 
-    connect();
+    if (extApiHealthCheckError) {
+      toast.error(extApiHealthCheckError.message);
+    }
+  }, [getTokenError, extApiHealthCheckError]);
 
+  useEffect(() => {
+    if (isReady && isExtApiHealthy && !hasAttemptedToConnect.current) {
+      hasAttemptedToConnect.current = true;
+      connect();
+    }
+  }, [isReady, isExtApiHealthy]);
+
+  useEffect(function cleanUpOnUnmount() {
     return () => {
       if (wsRef.current) {
         console.debug("Cleanup: Closing WebSocket connection");
         wsRef.current.close(1000, "Component unmount");
         wsRef.current = null;
       }
-      hasAttemptedInitialJoin.current = false;
     };
-  }, [roomId, token]);
+  }, []);
 
-  return { isPromptForPin, rejoinWithPin };
+  return { reConnectAndJoinWithPin };
 }
