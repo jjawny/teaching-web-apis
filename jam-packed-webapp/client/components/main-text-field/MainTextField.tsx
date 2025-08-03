@@ -19,7 +19,6 @@ export default function MainTextField({
   const [httpError, setHttpError] = useState<string | null>(null);
   const [query, setQuery] = useState("madman");
   const roomPinError = useWsCtx((ctx) => ctx.pinError);
-  const setRoomPinError = useWsCtx((ctx) => ctx.setRoomPinError);
   const pin = useWsCtx((ctx) => ctx.roomPin);
   const hasJoinedRoom = useWsCtx((ctx) => ctx.hasJoinedRoom);
   const isAttemptingToConnect = useWsCtx((ctx) => ctx.isAttemptingToConnect);
