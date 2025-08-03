@@ -3,11 +3,11 @@
 import { Loader2Icon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "~/client/components/ui/button";
 import Pin from "~/client/components/ws-card/Pin";
 import { useGetAndRefreshCustomJwt } from "~/client/hooks/useFetchApiToken";
 import { useWsCtx } from "~/client/hooks/useWsCtx";
 import { clientEnv } from "~/shared/modules/env";
-import { Button } from "../ui/button";
 
 export default function MainTextField({
   reConnectAndJoinWithPin,
@@ -27,7 +27,6 @@ export default function MainTextField({
   const isPendingPinFromUser = useWsCtx((ctx) => ctx.isPendingPinFromUser);
   const setPin = useWsCtx((ctx) => ctx.setRoomPin);
   const wsReadyState = useWsCtx((ctx) => ctx.wsReadyState);
-  const isCheckingExtApiHealth = useWsCtx((ctx) => ctx.isCheckingExtApiHealth);
   const roomId = useWsCtx((ctx) => ctx.roomId);
   // this bool is separate from the one in the context, that one's loading state is covered by isConnecting etc
   const { data: token, error: tokenError } = useGetAndRefreshCustomJwt();
@@ -77,7 +76,7 @@ export default function MainTextField({
   const isConnected = wsReadyState === WebSocket.OPEN;
   const isConnecting = wsReadyState === WebSocket.CONNECTING;
 
-  if (isConnecting || isJoiningRoom || isCheckingExtApiHealth || isAttemptingToConnect) {
+  if (isConnecting || isJoiningRoom || isAttemptingToConnect) {
     return (
       <>
         <Loader2Icon className="h-12 w-12 animate-spin text-cyan-300" strokeWidth={3} />;
@@ -143,7 +142,7 @@ export default function MainTextField({
       <p>
         {isConnecting ? "isConnecting true" : "isConnecting false"} -{" "}
         {isJoiningRoom ? "isJoiningRoom true" : "isJoiningRoom false"} -
-        {isCheckingExtApiHealth ? "isCheckingExtApiHealth true" : "isCheckingExtApiHealth false"}
+        {isAttemptingToConnect ? "isAttemptingToConnect true" : "isAttemptingToConnect false"}
       </p>
     </>
   );
