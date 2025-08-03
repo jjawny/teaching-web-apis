@@ -10,7 +10,7 @@ import {
   WifiLow,
   WifiOffIcon,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useWsCtx } from "~/client/hooks/useWsCtx";
 import { cn } from "~/client/utils/cn";
 import WsCardMessagesContainer from "./WsCardMessagesContainer";
@@ -58,15 +58,10 @@ function getConnectionStyles(readyState: number, wsError?: string) {
   }
 }
 
-export default function WsCard({
-  messagesExpanded,
-  setMessagesExpanded,
-}: {
-  messagesExpanded: boolean;
-  setMessagesExpanded: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export default function WsCard() {
+  const [messagesExpanded, setMessagesExpanded] = useState(false);
+
   const readyStatus = useWsCtx((ctx) => ctx.wsReadyState);
-  const hasJoinedRoom = useWsCtx((ctx) => ctx.hasJoinedRoom);
   const wsError = useWsCtx((ctx) => ctx.wsError);
 
   const [backgroundStyle, borderStyle] = getConnectionStyles(readyStatus, wsError);
