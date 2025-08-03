@@ -1,32 +1,58 @@
 import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { useEffect, useRef, useState } from "react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "~/client/components/ui/input-otp";
 import { cn } from "~/client/utils/cn";
 
 const LARGE_STYLES = "w-16 h-16 text-3xl";
 
-export type PinHelperText = {
-  errorText?: string;
-  helperText?: string;
+type PinHelperText = {
+  error?: string;
+  helper?: string;
 };
 
 /**
  * Simple PIN component that doesn't reference any stores
  */
 export default function Pin({
-  isPlayShakeAnimation = false,
   pinHelperText,
   value,
   onChange,
   onComplete,
 }: {
-  isPlayShakeAnimation: boolean;
   pinHelperText?: PinHelperText;
   value: string;
   onChange: (value: string) => void;
   onComplete: (value: string) => void;
 }) {
-  const hasError = !!pinHelperText?.errorText;
+  const hasError = !!pinHelperText?.error;
   const ariaInvalidLabel = hasError ? "true" : "false";
+  const hasMounted = useRef<boolean>(false);
+  const [isPlayShakeAnimation, setIsPlayShakeAnimation] = useState(false);
+
+  useEffect(
+    function completeOnMount() {
+      if (value.length === 4 && !hasMounted.current) {
+        onComplete(value);
+      }
+      hasMounted.current = true;
+    },
+    [value, onComplete],
+  );
+
+  useEffect(
+    function shakeOnError() {
+      if (value.length === 4 && hasError) {
+        setIsPlayShakeAnimation(true);
+
+        const timeout = setTimeout(() => {
+          setIsPlayShakeAnimation(false);
+        }, 300);
+
+        return () => clearTimeout(timeout);
+      }
+    },
+    [value, hasError, setIsPlayShakeAnimation],
+  );
 
   return (
     <div>
@@ -51,13 +77,11 @@ export default function Pin({
 }
 
 function HelperText({ pinHelperText }: { pinHelperText?: PinHelperText }) {
-  if (pinHelperText?.errorText) {
-    return <span className="block pt-2 text-center text-red-500">{pinHelperText.errorText}</span>;
+  if (pinHelperText?.error) {
+    return <span className="block pt-2 text-center text-red-500">{pinHelperText.error}</span>;
   }
 
   return (
-    <span className="block pt-2 text-center opacity-50">
-      {pinHelperText?.helperText ?? "\u200B"}
-    </span>
+    <span className="block pt-2 text-center opacity-50">{pinHelperText?.helper ?? "\u200B"}</span>
   );
 }
