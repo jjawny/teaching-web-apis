@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { WsMessageType } from "~/client/enums/ws-message-type";
+import { userCtx } from "~/client/modules/user-context";
 import { clientEnv } from "~/shared/modules/env";
-import { userCtx } from "../modules/user-context";
-import { useGetAndRefreshCustomJwt } from "./useFetchApiToken";
-import { useExtApiHealthCheckQuery } from "./useHealthCheckQuery";
+import { useGetJamPackedWebApiToken } from "./useGetJamPackedWebApiToken";
+import { useJamPackedWebApiHealthCheckQuery } from "./useJamPackedWebApiHealthCheckQuery";
 import { useTimelineCtx } from "./useTimelineCtx";
 import { useWsCtx } from "./useWsCtx";
 
@@ -29,8 +29,10 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
   const setIsPendingPinUser = useWsCtx((ctx) => ctx.setIsPendingPinFromUser);
 
   const addTick = useTimelineCtx((ctx) => ctx.addTick);
-  const { refetch: refetchAndRefreshCustomJwt, error: getTokenError } = useGetAndRefreshCustomJwt();
-  const { data: isExtApiHealthy, error: extApiHealthCheckError } = useExtApiHealthCheckQuery();
+  const { refetch: refetchJamPackedWebApiToken, error: jamPackedWebApiTokenError } =
+    useGetJamPackedWebApiToken();
+  const { data: isJamPackedWebApiHealthy, error: jamPackedWebApiError } =
+    useJamPackedWebApiHealthCheckQuery();
 
   const retryCount = useRef(0);
   const hasAttemptedToConnect = useRef(false);
@@ -74,7 +76,7 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
 
     console.debug("Creating new websocket connection");
 
-    const token = await refetchAndRefreshCustomJwt();
+    const token = await refetchJamPackedWebApiToken();
 
     if (token.error) {
       console.warn("No token available, cannot connect to WebSocket");
@@ -88,7 +90,7 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
       return;
     }
 
-    const backendUrl = clientEnv.NEXT_PUBLIC_BACKEND_URL;
+    const backendUrl = clientEnv.NEXT_PUBLIC_JAM_PACKED_WEBAPI_URL;
     const wsUrl = backendUrl.replace(/^http/, "ws") + `/ws?token=${token.data}`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
@@ -216,7 +218,7 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
     };
   }, [
     maxRetries,
-    isExtApiHealthy,
+    isJamPackedWebApiHealthy,
     setIsPendingPinUser,
     setIsJoiningRoom,
     joinedRoom,
@@ -259,21 +261,21 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
   );
 
   useEffect(() => {
-    if (getTokenError) {
-      toast.error(getTokenError.message);
+    if (jamPackedWebApiTokenError) {
+      toast.error(jamPackedWebApiTokenError.message);
     }
 
-    if (extApiHealthCheckError) {
-      toast.error(extApiHealthCheckError.message);
+    if (jamPackedWebApiError) {
+      toast.error(jamPackedWebApiError.message);
     }
-  }, [getTokenError, extApiHealthCheckError]);
+  }, [jamPackedWebApiTokenError, jamPackedWebApiError]);
 
   useEffect(() => {
-    if (isReady && isExtApiHealthy && !hasAttemptedToConnect.current) {
+    if (isReady && isJamPackedWebApiHealthy && !hasAttemptedToConnect.current) {
       hasAttemptedToConnect.current = true;
       connect();
     }
-  }, [isReady, isExtApiHealthy]);
+  }, [isReady, isJamPackedWebApiHealthy]);
 
   useEffect(function cleanUpOnUnmount() {
     return () => {

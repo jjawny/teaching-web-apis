@@ -28,5 +28,5 @@ func ValidateJWT(tokenString string) (*jwt.Token, jwt.MapClaims, error) {
 }
 
 func getJwtSecret() []byte {
-	return []byte(os.Getenv("CUSTOM_JWT_SECRET"))
+	return []byte(os.Getenv("JAM_PACKED_WEBAPI_TOKEN_SECRET"))
 }

@@ -1,15 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { userCtx } from "~/client/modules/user-context";
-import { CUSTOM_JWT_EXPIRY_MS } from "~/shared/constants";
-import { CustomJwtSchema } from "~/shared/models/jam-packed-webapi-token";
+import { JAM_PACKED_WEB_API_JWT_EXPIRY_MS } from "~/shared/constants";
+import { JamPackedWebApiJwtSchema } from "~/shared/models/jam-packed-webapi-token";
 
 const BUFFER_MS = 1 * 60 * 1000; // 1 minute
 
 /**
  * React Query hook to fetch the web API token.
- *
- * Usage:
- *   const { data: token, isLoading, error } = useFetchApiToken();
  *
  *
  * All queries that require the token should call this hook to ensure
@@ -25,15 +22,15 @@ const BUFFER_MS = 1 * 60 * 1000; // 1 minute
  *
  * for simplicty, show the error and let the user retry manually (highly unlikely and simple code)
  */
-export function useGetAndRefreshCustomJwt() {
+export function useGetJamPackedWebApiToken() {
   const userStatus = userCtx((ctx) => ctx.userStatus);
 
   return useQuery<string>({
     enabled: userStatus === "authenticated",
-    queryKey: ["webapi-token"],
+    queryKey: ["get-jam-packed-webapi-token"],
     queryFn: queryFn,
     retry: 3,
-    staleTime: CUSTOM_JWT_EXPIRY_MS - BUFFER_MS, // always refetch (cache miss) when about to expire
+    staleTime: JAM_PACKED_WEB_API_JWT_EXPIRY_MS - BUFFER_MS, // always refetch (cache miss) when about to expire
   });
 }
 
@@ -54,7 +51,7 @@ async function queryFn(): Promise<string> {
   }
 
   const data = await res.json();
-  const validationRes = CustomJwtSchema.safeParse(data);
+  const validationRes = JamPackedWebApiJwtSchema.safeParse(data);
 
   if (!validationRes.success) {
     const errorMessage = "Oh no! Unexpected response from the server";

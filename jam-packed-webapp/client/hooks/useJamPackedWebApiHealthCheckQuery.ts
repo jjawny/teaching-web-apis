@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { clientEnv } from "~/shared/modules/env";
 
-export function useExtApiHealthCheckQuery() {
+export function useJamPackedWebApiHealthCheckQuery() {
   return useQuery<boolean>({
     queryKey: ["health-check"],
     queryFn: queryFn,
@@ -15,14 +15,14 @@ export function useExtApiHealthCheckQuery() {
 
 async function queryFn(): Promise<boolean> {
   try {
-    const res = await fetch(clientEnv.NEXT_PUBLIC_BACKEND_URL, {
+    const res = await fetch(clientEnv.NEXT_PUBLIC_JAM_PACKED_WEBAPI_URL, {
       method: "GET",
       headers: { Accept: "application/json" },
     });
 
     return res.ok;
   } catch (error) {
-    console.warn("Error checking health API token:", error);
+    console.warn("Error checking Jam Packed Web API's health:", error);
     return false;
   }
 }

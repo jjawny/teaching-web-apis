@@ -8,7 +8,7 @@ interface ProcessResponse {
 
 async function processJob(variables: { query: string }): Promise<ProcessResponse> {
   const { query } = variables;
-  const res = await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_URL}/api/check-aura`, {
+  const res = await fetch(`${clientEnv.NEXT_PUBLIC_JAM_PACKED_WEBAPI_URL}/api/check-aura`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query }),

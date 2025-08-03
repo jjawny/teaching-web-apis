@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { auth } from "~/app/api/auth/[...nextauth]/route";
-import { CUSTOM_JWT_EXPIRY_MS } from "~/shared/constants";
+import { JAM_PACKED_WEB_API_JWT_EXPIRY_MS } from "~/shared/constants";
+import { serverEnv } from "~/shared/modules/env";
 var jwt = require("jsonwebtoken");
 
 // #AUTH
@@ -21,7 +22,7 @@ var jwt = require("jsonwebtoken");
 //    before giving users access to the webapi
 //  TODO: Enhancement is to store the JWT so we can revoke upon sign out etc
 
-const CUSTOM_JWT_EXPIRY_S = Math.floor(CUSTOM_JWT_EXPIRY_MS / 1000);
+const JAM_PACKED_WEB_API_JWT_EXPIRY_S = Math.floor(JAM_PACKED_WEB_API_JWT_EXPIRY_MS / 1000);
 
 export async function GET(req: NextRequest) {
   // Check RBAC here etc
@@ -35,8 +36,8 @@ export async function GET(req: NextRequest) {
     avatar: session.user?.image,
   };
 
-  const webapiJwt = jwt.sign(claims, process.env.CUSTOM_JWT_SECRET!, {
-    expiresIn: CUSTOM_JWT_EXPIRY_S,
+  const webapiJwt = jwt.sign(claims, serverEnv.JAM_PACKED_WEBAPI_TOKEN_SECRET, {
+    expiresIn: JAM_PACKED_WEB_API_JWT_EXPIRY_S,
   });
 
   return Response.json({ jwt: webapiJwt });

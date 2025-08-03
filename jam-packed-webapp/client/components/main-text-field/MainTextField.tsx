@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/client/components/ui/button";
 import Pin from "~/client/components/ws-card/Pin";
-import { useGetAndRefreshCustomJwt } from "~/client/hooks/useFetchApiToken";
+import { useGetJamPackedWebApiToken } from "~/client/hooks/useGetJamPackedWebApiToken";
 import { useWsCtx } from "~/client/hooks/useWsCtx";
 import { clientEnv } from "~/shared/modules/env";
 
@@ -28,7 +28,7 @@ export default function MainTextField({
   const wsReadyState = useWsCtx((ctx) => ctx.wsReadyState);
   const roomId = useWsCtx((ctx) => ctx.roomId);
   // this bool is separate from the one in the context, that one's loading state is covered by isConnecting etc
-  const { data: token, error: tokenError } = useGetAndRefreshCustomJwt();
+  const { data: token, error: tokenError } = useGetJamPackedWebApiToken();
 
   useEffect(() => {
     if (tokenError) {
@@ -46,7 +46,7 @@ export default function MainTextField({
     setHttpError(null);
     try {
       const response = await fetch(
-        `${clientEnv.NEXT_PUBLIC_BACKEND_URL}/api/check-aura?isSkipCache=true`,
+        `${clientEnv.NEXT_PUBLIC_JAM_PACKED_WEBAPI_URL}/api/check-aura?isSkipCache=true`,
         {
           method: "POST",
 
