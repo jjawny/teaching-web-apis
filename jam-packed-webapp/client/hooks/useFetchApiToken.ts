@@ -1,16 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import { userCtx } from "~/client/modules/user-context";
 import { CUSTOM_JWT_EXPIRY_MS } from "~/shared/constants";
+import { CustomJwtSchema } from "~/shared/models/get-webapi-token";
 
 const BUFFER_MS = 1 * 60 * 1000; // 1 minute
-
-// Fetches the web API token from the backend
-async function fetchWebApiToken(): Promise<string | null> {
-  const res = await fetch("/api/get-webapi-token", {
-    credentials: "include",
-  });
-  const data = await res.json();
-  return data.jwt ?? null;
-}
 
 /**
  * React Query hook to fetch the web API token.
@@ -32,12 +25,42 @@ async function fetchWebApiToken(): Promise<string | null> {
  *
  * for simplicty, show the error and let the user retry manually (highly unlikely and simple code)
  */
-export function useGetAndRefreshCustomJwt(isAuthenticated = true) {
-  return useQuery({
-    enabled: isAuthenticated,
+export function useGetAndRefreshCustomJwt() {
+  const userStatus = userCtx((ctx) => ctx.userStatus);
+
+  return useQuery<string>({
+    enabled: userStatus === "authenticated",
     queryKey: ["webapi-token"],
-    queryFn: fetchWebApiToken,
+    queryFn: queryFn,
     retry: 3,
     staleTime: CUSTOM_JWT_EXPIRY_MS - BUFFER_MS, // always refetch (cache miss) when about to expire
   });
+}
+
+// Unfortunately, RQ expects nulls (not undefined) if no data.
+// Unfortunately, RQ expects a thrown error for error prop, so throw
+//  and expose a user-friendly message for the UI, but log (warn) the full response.
+async function queryFn(): Promise<string> {
+  const res = await fetch("/api/get-webapi-token", {
+    method: "GET",
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+
+  if (!res.ok) {
+    const errorMessage = "Oh no! Unable to get your access token, please refresh to try again";
+    console.warn(errorMessage, res);
+    throw new Error(errorMessage);
+  }
+
+  const data = await res.json();
+  const validationRes = CustomJwtSchema.safeParse(data);
+
+  if (!validationRes.success) {
+    const errorMessage = "Oh no! Unexpected response from the server";
+    console.warn(errorMessage, validationRes.error);
+    throw new Error(errorMessage);
+  }
+
+  return validationRes.data.jwt;
 }
