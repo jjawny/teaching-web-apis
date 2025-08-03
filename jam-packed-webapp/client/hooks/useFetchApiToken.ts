@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { userCtx } from "~/client/modules/user-context";
 import { CUSTOM_JWT_EXPIRY_MS } from "~/shared/constants";
-import { CustomJwtSchema } from "~/shared/models/get-webapi-token";
+import { CustomJwtSchema } from "~/shared/models/jam-packed-webapi-token";
 
 const BUFFER_MS = 1 * 60 * 1000; // 1 minute
 
@@ -41,7 +41,7 @@ export function useGetAndRefreshCustomJwt() {
 // Unfortunately, RQ expects a thrown error for error prop, so throw
 //  and expose a user-friendly message for the UI, but log (warn) the full response.
 async function queryFn(): Promise<string> {
-  const res = await fetch("/api/get-webapi-token", {
+  const res = await fetch("/api/get-jam-packed-webapi-token", {
     method: "GET",
     credentials: "include",
     headers: { Accept: "application/json" },
