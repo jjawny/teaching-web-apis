@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { GOOGLE_LOGO_URL } from "./constants";
+import { GOOGLE_LOGO_URL } from "~/shared/constants";
 
 export default function GoogleLogo() {
   return (
