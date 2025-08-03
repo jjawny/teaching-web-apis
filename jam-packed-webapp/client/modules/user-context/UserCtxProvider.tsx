@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect } from "react";
-import { LoadingPage } from "~/client/components/LoadingPage";
+import { LoadingPage } from "~/client/components/pages/LoadingPage";
 import { ANON_ROUTES, LOGIN_ROUTE } from "~/shared/constants";
 import { userCtx } from "./UserCtx";
 
