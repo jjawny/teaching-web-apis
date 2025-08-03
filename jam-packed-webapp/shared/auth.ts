@@ -7,7 +7,7 @@ import { serverEnv } from "~/shared/modules/env";
 export const authConfig: NextAuthConfig = {
   // debug: false,
   session: { strategy: "jwt" },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: serverEnv.NEXTAUTH_SECRET,
   providers: [
     Google({
       clientId: serverEnv.AUTH_GOOGLE_CLIENT_ID,
