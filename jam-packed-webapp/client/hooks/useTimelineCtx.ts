@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { Tick } from "~/client/models/tick";
 
+const TIME_PER_TICK_MS = 180; // To avoid overlaps
+
 /**
  * - Global access to easily add ticks to a timeline
  * - What about IDs? Ticks are immutable, so we can use a simpler counter
@@ -17,6 +19,7 @@ import { Tick } from "~/client/models/tick";
 type TimelineCtx = {
   ticks: Tick[];
   nextId: number;
+  lastTickTimestamp?: number;
   addTick: (type?: Tick["type"]) => void;
 };
 
@@ -25,14 +28,27 @@ export const useTimelineCtx = create<TimelineCtx>((set, get) => ({
   nextId: 0,
   addTick: (type?: Tick["type"]) => {
     set((state) => {
+      const now = Date.now();
+      let timestamp = now;
+
+      // If overlapping, push this tick into the future
+      if (state.lastTickTimestamp) {
+        const elapsed = now - state.lastTickTimestamp;
+        if (elapsed < TIME_PER_TICK_MS) {
+          timestamp = state.lastTickTimestamp + TIME_PER_TICK_MS;
+        }
+      }
+
       const tick: Tick = {
         id: state.nextId,
-        timestamp: Date.now(),
+        timestamp: timestamp,
         type: type ?? "basic",
       };
+
       return {
         ticks: [...state.ticks, tick],
         nextId: state.nextId + 1,
+        lastTickTimestamp: timestamp,
       };
     });
   },
