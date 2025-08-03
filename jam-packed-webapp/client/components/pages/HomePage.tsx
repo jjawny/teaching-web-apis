@@ -14,7 +14,7 @@ export default function HomePage() {
 
   return (
     <div className={cn("grid min-h-screen place-content-center", "font-sans")}>
-      <main className="row-start-2 flex flex-col items-center gap-[21px]">
+      <main className="flex flex-col items-center gap-[21px]">
         <Hero />
         <TimelineBar />
         <MainTextField reConnectAndJoinWithPin={reConnectAndJoinWithPin} />
