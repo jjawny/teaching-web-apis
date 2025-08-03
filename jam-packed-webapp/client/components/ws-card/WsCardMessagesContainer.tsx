@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 import SlidingCounter from "~/client/components/SlidingCounter";
 import { useWsCtx } from "~/client/hooks/useWsCtx";

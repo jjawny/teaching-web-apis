@@ -1,3 +1,5 @@
+"use client";
+
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useEffect, useRef, useState } from "react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "~/client/components/ui/input-otp";
