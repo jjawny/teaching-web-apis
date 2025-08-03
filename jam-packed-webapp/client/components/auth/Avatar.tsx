@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import { userCtx } from "~/client/modules/user-context";
-import { getContrastTextColor, getFontSize, getInitials, stringToHexColor } from "./helpers";
+import {
+  getContrastTextColor,
+  getFontSize,
+  getInitials,
+  stringToHexColor,
+} from "~/client/utils/avatar-utils";
 
 const AVATAR_DIMENSIONS_PX = 30;
 
