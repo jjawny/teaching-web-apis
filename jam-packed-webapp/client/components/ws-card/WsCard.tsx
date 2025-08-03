@@ -39,7 +39,7 @@ function useTransitioningIcon() {
 }
 
 // Get background and border styles based on connection state
-function getConnectionStyles(readyState: number, hasJoinedRoom: boolean, wsError?: string) {
+function getConnectionStyles(readyState: number, wsError?: string) {
   if (wsError) {
     return [WS_ERROR_BG, "border-red-300"];
   }
@@ -67,7 +67,7 @@ export default function WsCard({
   const hasJoinedRoom = useWsCtx((ctx) => ctx.hasJoinedRoom);
   const wsError = useWsCtx((ctx) => ctx.wsError);
 
-  const [backgroundStyle, borderStyle] = getConnectionStyles(readyStatus, hasJoinedRoom, wsError);
+  const [backgroundStyle, borderStyle] = getConnectionStyles(readyStatus, wsError);
 
   return (
     <div className="mx-auto w-[500px]">
