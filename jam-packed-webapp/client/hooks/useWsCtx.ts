@@ -11,48 +11,60 @@ import { WsMessage } from "~/client/models/ws-message";
  *  - Meanwhile, other components subscribe mostly to read values
  */
 type WsCtx = {
-  wsReadyState: WebSocket["readyState"];
+  // Statuses
+  wsReadyState: WebSocket["readyState"]; // CONNECTING, OPEN, CLOSING, CLOSED
+  isJoiningRoom: boolean;
+  isPendingPinFromUser: boolean;
   hasJoinedRoom: boolean;
+  isAttemptingToConnect: boolean;
+  // Room
   roomId?: string;
   roomName?: string;
-  pin?: string; // for quick re-auto-joins TODO: in local storage
+  roomPin?: string; // TODO: save and load from local storage for re-auto-joins
+  // Messages
+  messages: WsMessage[];
+  // Errors
   pinError?: string;
   wsError?: string;
-  messages: WsMessage[];
-  setPin: (pin: string) => void;
-  setPinError: (pinError?: string) => void;
+  // Actions
+  setIsAttemptingToConnect: (isAttempting: boolean) => void;
+  setRoomPin: (pin: string) => void;
+  setRoomPinError: (pinError?: string) => void;
   setWsError: (wsError?: string) => void;
   setWsReadyState: (readyState: WebSocket["readyState"]) => void;
+  setRoomId: (roomId: string) => void;
+  setIsJoiningRoom: (isJoining: boolean) => void;
+  setIsPendingPinFromUser: (isPending: boolean) => void;
   addMessage: (message: WsMessage) => void;
-  joinRoom: (roomId: string, roomName: string, pin?: string) => void;
-  leaveRoom: () => void;
+  joinedRoom: (roomId: string, roomName: string, pin?: string) => void;
+  leftRoom: () => void;
+  getDebugDump: () => object;
 };
 
 export const useWsCtx = create<WsCtx>((set, get) => ({
   wsReadyState: WebSocket.CLOSED,
+  isJoiningRoom: false,
+  isPendingPinFromUser: false,
+  isAttemptingToConnect: false,
   hasJoinedRoom: false,
-  roomId: undefined,
-  roomName: undefined,
-  pin: undefined,
+  // For this demo, simply create a random new room
+  // In a real app, we'd let the user choose/control their rooms
+  roomId: "123",
+  roomName: "Johnny's room",
+  roomPin: undefined,
+  messages: [],
   pinError: undefined,
   wsError: undefined,
-  messages: [],
-  setPin: (pin: string) => {
-    set({ pin: pin });
-  },
-  setPinError: (error?: string) => {
-    set({ pinError: error });
-  },
-  setWsReadyState: (readyState: WebSocket["readyState"]) => {
-    set({ wsReadyState: readyState });
-  },
-  setWsError: (error?: string) => {
-    set({ wsError: error });
-  },
-  addMessage: (message: WsMessage) => {
-    set((state) => ({ messages: [...(state.messages ?? []), message] }));
-  },
-  joinRoom: (roomId, roomName, pin) => {
+  setIsAttemptingToConnect: (isAttemptingToConnect) => set({ isAttemptingToConnect }),
+  setRoomPin: (pin: string) => set({ roomPin: pin }),
+  setRoomPinError: (error) => set({ pinError: error }),
+  setWsReadyState: (readyState) => set({ wsReadyState: readyState }),
+  setWsError: (error) => set({ wsError: error }),
+  setRoomId: (roomId) => set({ roomId }),
+  setIsJoiningRoom: (isJoining) => set({ isJoiningRoom: isJoining }),
+  setIsPendingPinFromUser: (isPending) => set({ isPendingPinFromUser: isPending }),
+  addMessage: (message) => set((state) => ({ messages: [...(state.messages ?? []), message] })),
+  joinedRoom: (roomId, roomName, pin) => {
     console.debug("joining room", roomId);
     const isRejoining = get().roomId === roomId;
 
@@ -60,19 +72,23 @@ export const useWsCtx = create<WsCtx>((set, get) => ({
       hasJoinedRoom: true,
       roomId,
       roomName,
-      pin: pin !== undefined ? pin : state.pin, // Keep existing PIN if none provided
+      roomPin: pin !== undefined ? pin : state.roomPin, // Keep existing PIN if none provided
       wsError: undefined,
       messages: isRejoining ? state.messages : [],
     }));
   },
-  leaveRoom: () => {
+  leftRoom: () => {
     console.debug("leaving room", get().roomId);
     set({
       hasJoinedRoom: false,
-      roomId: undefined,
-      roomName: undefined,
-      pin: undefined,
+      // roomId: undefined,
+      // roomName: undefined,
+      // roomPin: undefined,
       messages: [],
     });
+  },
+  getDebugDump: () => {
+    const state = get();
+    return Object.fromEntries(Object.entries(state).filter(([_, v]) => typeof v !== "function"));
   },
 }));
