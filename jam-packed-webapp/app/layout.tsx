@@ -11,6 +11,7 @@ import {
   Syne,
 } from "next/font/google";
 import Debug from "~/client/components/Debug";
+import GlobalLayout from "~/client/components/GlobalLayout";
 import SvgFilters from "~/client/components/SvgFilters";
 import { ReactQueryProvider } from "~/client/modules/react-query-provider";
 import { UserCtxProvider } from "~/client/modules/user-context";
@@ -70,7 +71,9 @@ export default function RootLayout({
         <SvgFilters />
         <ReactQueryProvider>
           <SessionProvider refetchInterval={REFRESH_AUTH_INTERVAL}>
-            <UserCtxProvider>{children}</UserCtxProvider>
+            <UserCtxProvider>
+              <GlobalLayout>{children}</GlobalLayout>
+            </UserCtxProvider>
           </SessionProvider>
         </ReactQueryProvider>
       </body>

@@ -1,4 +1,4 @@
-import { cn } from "../utils/cn";
+import { cn } from "~/client/utils/cn";
 
 export default function Credits({ className }: { className?: string }) {
   return (
