@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
-import { toast } from "sonner";
 import { WsMessageType } from "~/client/enums/ws-message-type";
 import { userCtx } from "~/client/modules/user-context";
+import { showError } from "~/client/utils/toast-utils";
 import { clientEnv } from "~/shared/modules/env";
 import { useGetJamPackedWebApiToken } from "./useGetJamPackedWebApiToken";
 import { useJamPackedWebApiHealthCheckQuery } from "./useJamPackedWebApiHealthCheckQuery";
@@ -259,16 +259,8 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
     [setRoomId, setRoomPin, connect, setIsJoiningRoom, setIsPendingPinUser],
   );
 
-  useEffect(() => {
-    if (tokenError) {
-      toast.error(tokenError.message);
-    }
-
-    if (jamPackedWebApiError) {
-      toast.error(jamPackedWebApiError.message);
-    }
-  }, [tokenError, jamPackedWebApiError]);
-
+  useEffect(() => showError(tokenError), [tokenError]);
+  useEffect(() => showError(jamPackedWebApiError), [jamPackedWebApiError]);
   useEffect(() => {
     if (isReady && isJamPackedWebApiHealthy && !hasAttemptedToConnect.current) {
       hasAttemptedToConnect.current = true;

@@ -5,11 +5,14 @@ import { toast } from "sonner";
 import { useGetJamPackedWebApiToken } from "~/client/hooks/useGetJamPackedWebApiToken";
 import { useTimelineCtx } from "~/client/hooks/useTimelineCtx";
 import { useWsCtx } from "~/client/hooks/useWsCtx";
+import { showError } from "~/client/utils/toast-utils";
 import { clientEnv } from "~/shared/modules/env";
+
+type HttpStatus = "idle" | "loading" | "success" | "error";
 
 export default function MainTextField() {
   const [processing, setProcessing] = useState<boolean>(false);
-  const [httpStatus, setHttpStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [httpStatus, setHttpStatus] = useState<HttpStatus>("idle");
   const [httpError, setHttpError] = useState<string | null>(null);
   const [query, setQuery] = useState("madman");
   const roomId = useWsCtx((ctx) => ctx.roomId);
@@ -17,11 +20,7 @@ export default function MainTextField() {
 
   const { data: token, error: tokenError } = useGetJamPackedWebApiToken();
 
-  useEffect(() => {
-    if (tokenError) {
-      toast.error(tokenError.message);
-    }
-  }, [tokenError]);
+  useEffect(() => showError(tokenError), [tokenError]);
 
   const handleStart = useCallback(async () => {
     addTick("click");
