@@ -7,6 +7,7 @@ import { useTimelineCtx } from "~/client/hooks/useTimelineCtx";
 import { useWsCtx } from "~/client/hooks/useWsCtx";
 import { showError } from "~/client/utils/toast-utils";
 import { clientEnv } from "~/shared/modules/env";
+import ShrinkingInput from "./ui/shrinking-input";
 
 type HttpStatus = "idle" | "loading" | "success" | "error";
 
@@ -63,11 +64,10 @@ export default function MainTextField() {
   return (
     <>
       <div className="mb-2">
-        <input
+        <ShrinkingInput
+          label="Your Username"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="rounded border px-2 py-1"
-          placeholder="Your Username"
           disabled={processing}
         />
       </div>
