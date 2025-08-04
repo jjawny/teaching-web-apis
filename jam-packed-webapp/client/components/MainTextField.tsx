@@ -59,16 +59,19 @@ export default function MainTextField() {
     } finally {
       setProcessing(false);
     }
-  }, [token]);
+  }, [token, query]);
+
+  // TODO: local errors and ext/network errors show stacked
 
   return (
     <>
-      <div className="mb-2">
+      <div className="mb-2 w-full">
         <ShrinkingInput
           label="Your Username"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           disabled={processing}
+          className="text-lg"
         />
       </div>
       <button
