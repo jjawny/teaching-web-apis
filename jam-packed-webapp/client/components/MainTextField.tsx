@@ -1,5 +1,6 @@
 "use client";
 
+import { GaugeIcon, TimerIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useGetJamPackedWebApiToken } from "~/client/hooks/useGetJamPackedWebApiToken";
@@ -7,6 +8,7 @@ import { useTimelineCtx } from "~/client/hooks/useTimelineCtx";
 import { useWsCtx } from "~/client/hooks/useWsCtx";
 import { showError } from "~/client/utils/toast-utils";
 import { clientEnv } from "~/shared/modules/env";
+import IconSwitch from "./ui/icon-switch";
 import ShrinkingInput from "./ui/shrinking-input";
 
 type HttpStatus = "idle" | "loading" | "success" | "error";
@@ -17,6 +19,8 @@ export default function MainTextField() {
   const [httpError, setHttpError] = useState<string | null>(null);
   const [query, setQuery] = useState("madman");
   const roomId = useWsCtx((ctx) => ctx.roomId);
+  const [isChecked, setIsChecked] = useState<boolean>(true);
+
   const addTick = useTimelineCtx((ctx) => ctx.addTick);
 
   const { data: token, error: tokenError } = useGetJamPackedWebApiToken();
@@ -65,13 +69,24 @@ export default function MainTextField() {
 
   return (
     <>
-      <div className="mb-2 w-full">
+      <div className="mb-2 flex w-full gap-2">
         <ShrinkingInput
           label="Your Username"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           disabled={processing}
+          containerClassName="grow"
           className="text-lg"
+        />
+
+        <IconSwitch
+          isChecked={isChecked}
+          onCheckedChange={setIsChecked}
+          leftIcon={<GaugeIcon size={16} aria-hidden="true" />}
+          rightIcon={<TimerIcon size={16} aria-hidden="true" />}
+          tooltipContent={`Switch to ${isChecked ? "Throttle" : "Debounce"} mode`}
+          tooltipDelay={1000}
+          className="shrink"
         />
       </div>
       <button
