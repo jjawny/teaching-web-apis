@@ -3,14 +3,15 @@ import { cn } from "~/client/utils/cn";
 import { Input } from "./input";
 
 export default function ShrinkingInput({
+  containerClassName,
   className,
   label,
   ...props
-}: React.ComponentProps<"input"> & { label?: string }) {
+}: React.ComponentProps<"input"> & { label?: string; containerClassName?: string }) {
   const id = useId();
 
   return (
-    <div className="group relative">
+    <div className={cn("group relative", containerClassName)}>
       <label
         htmlFor={id}
         className={cn(
