@@ -22,7 +22,7 @@ const BUFFER_MS = 1 * 60 * 1000; // 1 minute
  *
  * for simplicty, show the error and let the user retry manually (highly unlikely and simple code)
  */
-export function useGetJamPackedWebApiToken() {
+export function useGetJamPackedWebApiTokenQuery() {
   const userStatus = userCtx((ctx) => ctx.userStatus);
 
   return useQuery<string>({

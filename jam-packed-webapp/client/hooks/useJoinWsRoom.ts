@@ -3,7 +3,7 @@ import { WsMessageType } from "~/client/enums/ws-message-type";
 import { userCtx } from "~/client/modules/user-context";
 import { showError } from "~/client/utils/toast-utils";
 import { clientEnv } from "~/shared/modules/env";
-import { useGetJamPackedWebApiToken } from "./useGetJamPackedWebApiToken";
+import { useGetJamPackedWebApiTokenQuery } from "./useGetJamPackedWebApiTokenQuery";
 import { useJamPackedWebApiHealthCheckQuery } from "./useJamPackedWebApiHealthCheckQuery";
 import { useTimelineCtx } from "./useTimelineCtx";
 import { useWsCtx } from "./useWsCtx";
@@ -29,7 +29,8 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
   const setIsPendingPinUser = useWsCtx((ctx) => ctx.setIsPendingRoomPinFromUser);
 
   const addTick = useTimelineCtx((ctx) => ctx.addTick);
-  const { refetch: refetchJamPackedWebApiToken, error: tokenError } = useGetJamPackedWebApiToken();
+  const { refetch: refetchJamPackedWebApiToken, error: tokenError } =
+    useGetJamPackedWebApiTokenQuery();
   const { data: isJamPackedWebApiHealthy, error: jamPackedWebApiError } =
     useJamPackedWebApiHealthCheckQuery();
 

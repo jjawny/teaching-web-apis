@@ -3,7 +3,7 @@
 import { GaugeIcon, TimerIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useGetJamPackedWebApiToken } from "~/client/hooks/useGetJamPackedWebApiToken";
+import { useGetJamPackedWebApiTokenQuery } from "~/client/hooks/useGetJamPackedWebApiTokenQuery";
 import { useTimelineCtx } from "~/client/hooks/useTimelineCtx";
 import { useWsCtx } from "~/client/hooks/useWsCtx";
 import { showError } from "~/client/utils/toast-utils";
@@ -23,7 +23,7 @@ export default function MainTextField() {
 
   const addTick = useTimelineCtx((ctx) => ctx.addTick);
 
-  const { data: token, error: tokenError } = useGetJamPackedWebApiToken();
+  const { data: token, error: tokenError } = useGetJamPackedWebApiTokenQuery();
 
   useEffect(() => showError(tokenError), [tokenError]);
 
