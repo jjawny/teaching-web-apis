@@ -143,6 +143,7 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
         reconnect();
       } else {
         console.log("Do not retry WebSocket");
+        setIsAttemptingToConnect(false);
       }
     };
 
