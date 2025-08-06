@@ -1,7 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { getExponentialBackoffDelay } from "~/client/utils/retry-utils";
+import { sleep } from "~/client/utils/sleep";
 import { clientEnv } from "~/shared/modules/env";
-import { sleep } from "../utils/sleep";
 
 interface ProcessJobVariables {
   roomId: string;
@@ -25,6 +26,7 @@ interface ProcessResponse {
 export function useCheckAuraMutation() {
   return useMutation<ProcessResponse, Error, ProcessJobVariables>({
     mutationFn: (variables) => processJobMutationFn(variables),
+    retryDelay: (attempt) => getExponentialBackoffDelay(attempt),
     retry: 3,
   });
 }
