@@ -6,8 +6,14 @@ export default function ShrinkingInput({
   containerClassName,
   className,
   label,
+  icon,
+
   ...props
-}: React.ComponentProps<"input"> & { label?: string; containerClassName?: string }) {
+}: React.ComponentProps<"input"> & {
+  label?: string;
+  containerClassName?: string;
+  icon?: React.ReactNode;
+}) {
   const id = useId();
 
   return (
@@ -23,6 +29,11 @@ export default function ShrinkingInput({
         <span className="bg-background inline-flex px-2">{label}</span>
       </label>
       <Input id={id} placeholder=" " className={className} {...props} />
+      {icon && (
+        <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
+          {icon}
+        </span>
+      )}
     </div>
   );
 }
