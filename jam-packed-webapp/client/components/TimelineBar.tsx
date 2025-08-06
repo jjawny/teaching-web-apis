@@ -2,12 +2,13 @@ import { MessageCircleIcon, PointerIcon, RectangleVerticalIcon, SendIcon } from 
 import { useEffect, useRef, useState } from "react";
 import { useTimelineCtx } from "~/client/hooks/useTimelineCtx";
 import { Tick } from "~/client/models/tick";
-
-const BAR_WIDTH_PX = 450;
-const ICON_SIZE_PX = 15;
-const BAR_HEIGHT_PX = 20;
-const TICK_WIDTH_PX = 5;
-const TIMELINE_DURATION_MS = 5000; // ttsf (time-til-slide-off)
+import {
+  TIMELINE_BAR_HEIGHT_PX,
+  TIMELINE_BAR_WIDTH_PX,
+  TIMELINE_DURATION_MS,
+  TIMELINE_ICON_SIZE_PX,
+  TIMELINE_TICK_WIDTH_PX,
+} from "~/shared/constants";
 
 export default function TimelineBar({
   isDebugging = false,
@@ -37,8 +38,8 @@ export default function TimelineBar({
   const visibleEvents = ticks.filter((e) => {
     const elapsed = now - e.timestamp;
     const progress = elapsed / TIMELINE_DURATION_MS;
-    const left = BAR_WIDTH_PX * (1 - progress);
-    return left + TICK_WIDTH_PX >= 0;
+    const left = TIMELINE_BAR_WIDTH_PX * (1 - progress);
+    return left + TIMELINE_TICK_WIDTH_PX >= 0;
   });
 
   return (
@@ -47,7 +48,7 @@ export default function TimelineBar({
 
       <div
         className="relative overflow-hidden rounded-xl border border-gray-300 bg-white"
-        style={{ width: BAR_WIDTH_PX, height: BAR_HEIGHT_PX }}
+        style={{ width: TIMELINE_BAR_WIDTH_PX, height: TIMELINE_BAR_HEIGHT_PX }}
       >
         {visibleEvents.map((e) => (
           <TickStamp key={e.id} tick={e} now={now} />
@@ -60,7 +61,7 @@ export default function TimelineBar({
 function TickStamp({ tick, now }: { tick: Tick; now: number }) {
   const elapsed = now - tick.timestamp;
   const progress = elapsed / TIMELINE_DURATION_MS;
-  const left = BAR_WIDTH_PX * (1 - progress);
+  const left = TIMELINE_BAR_WIDTH_PX * (1 - progress);
 
   if (tick.type !== "basic") {
     return (
@@ -68,12 +69,12 @@ function TickStamp({ tick, now }: { tick: Tick; now: number }) {
         className="absolute top-0 bottom-0 flex h-full items-center justify-center"
         style={{
           left,
-          width: ICON_SIZE_PX,
+          width: TIMELINE_ICON_SIZE_PX,
         }}
       >
-        {tick.type === "click" && <PointerIcon size={ICON_SIZE_PX} />}
-        {tick.type === "http" && <SendIcon size={ICON_SIZE_PX} />}
-        {tick.type === "ws" && <MessageCircleIcon size={ICON_SIZE_PX} />}
+        {tick.type === "click" && <PointerIcon size={TIMELINE_ICON_SIZE_PX} />}
+        {tick.type === "http" && <SendIcon size={TIMELINE_ICON_SIZE_PX} />}
+        {tick.type === "ws" && <MessageCircleIcon size={TIMELINE_ICON_SIZE_PX} />}
       </div>
     );
   }
@@ -83,7 +84,7 @@ function TickStamp({ tick, now }: { tick: Tick; now: number }) {
       className="absolute top-0 bottom-0 bg-stone-200"
       style={{
         left,
-        width: TICK_WIDTH_PX,
+        width: TIMELINE_TICK_WIDTH_PX,
       }}
     />
   );
@@ -100,19 +101,19 @@ function TestStampingOnTimeline() {
           onClick={() => addTick("basic")}
           className="mb-4 rounded bg-black px-3 py-1 text-white"
         >
-          <RectangleVerticalIcon size={ICON_SIZE_PX} />
+          <RectangleVerticalIcon size={TIMELINE_ICON_SIZE_PX} />
         </button>
         <button
           onClick={() => addTick("click")}
           className="mb-4 rounded bg-black px-3 py-1 text-white"
         >
-          <PointerIcon size={ICON_SIZE_PX} />
+          <PointerIcon size={TIMELINE_ICON_SIZE_PX} />
         </button>
         <button
           onClick={() => addTick("ws")}
           className="mb-4 rounded bg-black px-3 py-1 text-white"
         >
-          <MessageCircleIcon size={ICON_SIZE_PX} />
+          <MessageCircleIcon size={TIMELINE_ICON_SIZE_PX} />
         </button>
       </div>
     </>
