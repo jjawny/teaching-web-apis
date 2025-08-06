@@ -1,6 +1,6 @@
 "use client";
 
-import { GaugeIcon, TimerIcon } from "lucide-react";
+import { AlertCircle, CheckCircle2, GaugeIcon, Loader2, TimerIcon } from "lucide-react";
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCheckAuraMutation } from "~/client/hooks/useCheckAuraMutation";
 import { useGetJamPackedWebApiTokenQuery } from "~/client/hooks/useGetJamPackedWebApiTokenQuery";
@@ -9,6 +9,8 @@ import { useWsCtx } from "~/client/hooks/useWsCtx";
 import { debounce } from "~/client/utils/debounce";
 import { throttle } from "~/client/utils/throttle";
 import { toastError } from "~/client/utils/toast-utils";
+import { TIMELINE_BAR_WIDTH_PX } from "~/shared/constants";
+import { cn } from "../utils/cn";
 import IconSwitch from "./ui/icon-switch";
 import ShrinkingInput from "./ui/shrinking-input";
 
@@ -34,7 +36,7 @@ export default function MainTextField() {
     let timeout: NodeJS.Timeout | null = null;
     if (checkAuraMutation.isSuccess) {
       setIsSuccessful(true);
-      timeout = setTimeout(() => setIsSuccessful(false), 500);
+      timeout = setTimeout(() => setIsSuccessful(false), 1000);
     }
     return () => {
       if (timeout) {
@@ -112,30 +114,54 @@ export default function MainTextField() {
   };
 
   const getMutationStatusColor = () => {
+    // Separate from checkAuraMutation's success as temporary
+
+    if (isSuccessful) {
+      return "border border-green-500 focus-visible:border-green-500 focus-visible:ring-green-500/50";
+    }
     switch (checkAuraMutation.status) {
       case "pending":
-        return "bg-yellow-500";
-      case "success":
-        return "bg-green-500";
+        return "border border-yellow-500 focus-visible:border-yellow-500 focus-visible:ring-yellow-500/50";
+      // case "success":
+      // return "border border-green-500 focus-visible:border-green-500 focus-visible:ring-green-500/50";
       case "error":
-        return "bg-red-500";
+        return "border border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/50";
       case "idle":
       default:
-        return "bg-gray-500";
+        return "border border-gray-500 focus-visible:border-gray-500 focus-visible:ring-gray-500/50";
+    }
+  };
+
+  const getMutationStatusIcon = () => {
+    if (isSuccessful) {
+      return <CheckCircle2 className="text-green-500" size={20} />;
+    }
+    switch (checkAuraMutation.status) {
+      case "pending":
+        return <Loader2 className="animate-spin text-yellow-500" size={20} />;
+      case "error":
+        return <AlertCircle className="text-red-500" size={20} />;
+      case "idle":
+      default:
+        return null;
     }
   };
 
   // TODO: local errors and ext/network errors show stacked
 
   return (
-    <>
+    <div
+      className="flex flex-col items-center text-center"
+      style={{ width: `${TIMELINE_BAR_WIDTH_PX}px` }}
+    >
       <div className="mb-2 flex w-full gap-2">
         <ShrinkingInput
           label="Your Username"
           value={input}
           onChange={handleInputChange}
           containerClassName="grow"
-          className="bg-red-500 text-lg"
+          className={cn("text-lg", getMutationStatusColor())}
+          icon={getMutationStatusIcon()}
         />
 
         <IconSwitch
@@ -148,23 +174,12 @@ export default function MainTextField() {
           className="shrink"
         />
       </div>
-      <p>
-        {mode}
-        {}
+      {checkAuraMutation.error && <p className="text-red-500">{checkAuraMutation.error.message}</p>}
+      <p className="">
+        {mode === "throttle"
+          ? "Throttling; sends one (send) every {insert ms as seconds} seconds"
+          : "Debouncing, sends one (send icon tick) after {insert ms as seconds} seconds of inactivity"}
       </p>
-      <div className="mb-2">
-        <strong>HTTP Status:</strong>{" "}
-        {checkAuraMutation.isPending
-          ? "loading"
-          : checkAuraMutation.isSuccess
-            ? "success"
-            : checkAuraMutation.isError
-              ? "error"
-              : "idle"}
-        {checkAuraMutation.error && (
-          <span className="ml-2 text-red-500">{checkAuraMutation.error.message}</span>
-        )}
-      </div>
-    </>
+    </div>
   );
 }
