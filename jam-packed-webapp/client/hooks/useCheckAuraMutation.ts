@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { clientEnv } from "~/shared/modules/env";
+import { sleep } from "../utils/sleep";
 
 interface ProcessJobVariables {
   roomId: string;
@@ -37,6 +38,11 @@ async function processJobMutationFn(variables: ProcessJobVariables): Promise<Pro
     const errorMessage = "No token or room ID available, cannot start job";
     toast.error(errorMessage);
     throw new Error(errorMessage);
+  }
+  await sleep(1000);
+
+  if (username.toLocaleLowerCase() === ":::error:::") {
+    throw new Error("Simulated error for testing purposes");
   }
 
   const response = await fetch(
