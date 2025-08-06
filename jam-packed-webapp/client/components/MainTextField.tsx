@@ -53,6 +53,7 @@ export default function MainTextField() {
         toastError("No room ID or token available, cannot start job");
         return;
       }
+      addTick("http");
       console.log("here", { roomId, username: val, token });
       checkAuraMutation.mutate({
         roomId,
@@ -60,7 +61,7 @@ export default function MainTextField() {
         token: token.data,
       });
     },
-    [roomId, checkAuraMutation, refetchJamPackedWebApiToken],
+    [roomId, checkAuraMutation, refetchJamPackedWebApiToken, addTick],
   );
   // Debounce wrapper
   const debouncedTriggerRef = useRef(

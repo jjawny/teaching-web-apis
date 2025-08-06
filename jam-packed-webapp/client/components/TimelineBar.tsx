@@ -1,4 +1,4 @@
-import { MessageCircleIcon, PointerIcon, RectangleVerticalIcon, SendIcon } from "lucide-react";
+import { MessageCircleIcon, PlaneIcon, PointerIcon, RectangleVerticalIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTimelineCtx } from "~/client/hooks/useTimelineCtx";
 import { Tick } from "~/client/models/tick";
@@ -73,7 +73,7 @@ function TickStamp({ tick, now }: { tick: Tick; now: number }) {
         }}
       >
         {tick.type === "click" && <PointerIcon size={TIMELINE_ICON_SIZE_PX} />}
-        {tick.type === "http" && <SendIcon size={TIMELINE_ICON_SIZE_PX} />}
+        {tick.type === "http" && <PlaneIcon size={TIMELINE_ICON_SIZE_PX} />}
         {tick.type === "ws" && <MessageCircleIcon size={TIMELINE_ICON_SIZE_PX} />}
       </div>
     );
