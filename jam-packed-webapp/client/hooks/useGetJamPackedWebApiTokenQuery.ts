@@ -22,11 +22,11 @@ const BUFFER_MS = 1 * 60 * 1000; // 1 minute
  *
  * for simplicty, show the error and let the user retry manually (highly unlikely and simple code)
  */
-export function useGetJamPackedWebApiTokenQuery() {
+export function useGetJamPackedWebApiTokenQuery(options?: { isEnabled?: boolean }) {
   const userStatus = userCtx((ctx) => ctx.userStatus);
 
   return useQuery<string>({
-    enabled: userStatus === "authenticated",
+    enabled: (options?.isEnabled ?? true) && userStatus === "authenticated",
     queryKey: ["get-jam-packed-webapi-token"],
     queryFn: queryFn,
     retry: 3,
