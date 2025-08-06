@@ -6,11 +6,11 @@ import { useCheckAuraMutation } from "~/client/hooks/useCheckAuraMutation";
 import { useGetJamPackedWebApiTokenQuery } from "~/client/hooks/useGetJamPackedWebApiTokenQuery";
 import { useTimelineCtx } from "~/client/hooks/useTimelineCtx";
 import { useWsCtx } from "~/client/hooks/useWsCtx";
+import { cn } from "~/client/utils/cn";
 import { debounce } from "~/client/utils/debounce";
 import { throttle } from "~/client/utils/throttle";
 import { toastError } from "~/client/utils/toast-utils";
 import { TIMELINE_BAR_WIDTH_PX } from "~/shared/constants";
-import { cn } from "../utils/cn";
 import IconSwitch from "./ui/icon-switch";
 import ShrinkingInput from "./ui/shrinking-input";
 
@@ -175,11 +175,17 @@ export default function MainTextField() {
         />
       </div>
       {checkAuraMutation.error && <p className="text-red-500">{checkAuraMutation.error.message}</p>}
-      <p className="">
-        {mode === "throttle"
-          ? "Throttling; sends one (send) every {insert ms as seconds} seconds"
-          : "Debouncing, sends one (send icon tick) after {insert ms as seconds} seconds of inactivity"}
-      </p>
+      <ModeHelperText mode={mode} />
     </div>
+  );
+}
+
+function ModeHelperText({ mode }: { mode: Mode }) {
+  return (
+    <p className="text-muted-foreground text-sm">
+      {mode === "throttle"
+        ? "Throttling; sends one (send) every {insert ms as seconds} seconds"
+        : "Debouncing, sends one (send icon tick) after {insert ms as seconds} seconds of inactivity"}
+    </p>
   );
 }
