@@ -3,8 +3,8 @@
 import { MoonIcon, SunIcon } from "lucide-react";
 import { ReactNode, useId } from "react";
 
+import ThickTooltip from "~/client/components/ThickTooltip";
 import { cn } from "~/client/utils/cn";
-import ThickTooltip from "../ThickTooltip";
 import { Switch } from "./switch";
 
 export default function IconSwitch({

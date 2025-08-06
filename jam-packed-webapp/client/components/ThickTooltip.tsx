@@ -1,5 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/client/components/ui/tooltip";
-import { cn } from "../utils/cn";
+import { cn } from "~/client/utils/cn";
 
 export default function ThickTooltip({
   className,

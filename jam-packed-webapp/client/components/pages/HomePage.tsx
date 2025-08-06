@@ -1,7 +1,7 @@
 import Hero from "~/client/components/Hero";
+import MainContent from "~/client/components/MainContent";
 import WsCard from "~/client/components/ws-card/WsCard";
 import { cn } from "~/client/utils/cn";
-import MainContent from "../MainContent";
 
 export default function HomePage() {
   return (
