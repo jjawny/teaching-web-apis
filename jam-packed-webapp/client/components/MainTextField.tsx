@@ -1,69 +1,129 @@
 "use client";
 
 import { GaugeIcon, TimerIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
+import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCheckAuraMutation } from "~/client/hooks/useCheckAuraMutation";
 import { useGetJamPackedWebApiTokenQuery } from "~/client/hooks/useGetJamPackedWebApiTokenQuery";
 import { useTimelineCtx } from "~/client/hooks/useTimelineCtx";
 import { useWsCtx } from "~/client/hooks/useWsCtx";
-import { showError } from "~/client/utils/toast-utils";
-import { clientEnv } from "~/shared/modules/env";
+import { debounce } from "~/client/utils/debounce";
+import { throttle } from "~/client/utils/throttle";
+import { toastError } from "~/client/utils/toast-utils";
 import IconSwitch from "./ui/icon-switch";
 import ShrinkingInput from "./ui/shrinking-input";
 
-type HttpStatus = "idle" | "loading" | "success" | "error";
+type Mode = "throttle" | "debounce";
 
 export default function MainTextField() {
-  const [processing, setProcessing] = useState<boolean>(false);
-  const [httpStatus, setHttpStatus] = useState<HttpStatus>("idle");
-  const [httpError, setHttpError] = useState<string | null>(null);
-  const [query, setQuery] = useState("madman");
-  const roomId = useWsCtx((ctx) => ctx.roomId);
-  const [isChecked, setIsChecked] = useState<boolean>(true);
+  const [input, setInput] = useState<string>("");
+  const [mode, setMode] = useState<Mode>("throttle");
+  const [isSuccessful, setIsSuccessful] = useState<boolean>(false);
 
+  const roomId = useWsCtx((ctx) => ctx.roomId);
   const addTick = useTimelineCtx((ctx) => ctx.addTick);
 
-  const { data: token, error: tokenError } = useGetJamPackedWebApiTokenQuery();
+  const { refetch: refetchJamPackedWebApiToken, error: tokenError } =
+    useGetJamPackedWebApiTokenQuery({ isEnabled: false });
+  const checkAuraMutation = useCheckAuraMutation();
 
-  useEffect(() => showError(tokenError), [tokenError]);
+  const lastThrottleTimeRef = useRef<number>(0);
 
-  const handleStart = useCallback(async () => {
-    addTick("click");
-    if (!token || !roomId) {
-      toast.error("No token or room ID available, cannot start job");
+  useEffect(() => toastError(tokenError), [tokenError]);
+  useEffect(() => toastError(checkAuraMutation.error), [checkAuraMutation.error]);
+  useEffect(() => {
+    let timeout: NodeJS.Timeout | null = null;
+    if (checkAuraMutation.isSuccess) {
+      setIsSuccessful(true);
+      timeout = setTimeout(() => setIsSuccessful(false), 500);
+    }
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [checkAuraMutation.isSuccess]);
+
+  // Wrapped mutation trigger
+  const triggerMutation = useCallback(
+    async (val: string) => {
+      const token = await refetchJamPackedWebApiToken();
+      if (!roomId || !token.data) {
+        toastError("No room ID or token available, cannot start job");
+        return;
+      }
+      console.log("here", { roomId, username: val, token });
+      checkAuraMutation.mutate({
+        roomId,
+        username: val,
+        token: token.data,
+      });
+    },
+    [roomId, checkAuraMutation, refetchJamPackedWebApiToken],
+  );
+  // Debounce wrapper
+  const debouncedTriggerRef = useRef(
+    debounce((val: string) => {
+      triggerMutation(val);
+    }, 1000),
+  );
+
+  // Throttle wrapper
+  const throttledTrigger = useMemo(
+    () =>
+      throttle((val: string) => {
+        console.debug("throttle trigger", val);
+        triggerMutation(val);
+      }, 1000),
+    [triggerMutation],
+  );
+
+  // Cancel any pending debounce/throttle (mode switch)
+  const cancelPending = () => {
+    debouncedTriggerRef.current.cancel();
+    lastThrottleTimeRef.current = 0;
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInput(val);
+    if (mode === "debounce") {
+      debouncedTriggerRef.current(val);
       return;
     }
-    setProcessing(true);
-    setHttpStatus("loading");
-    setHttpError(null);
-    try {
-      const response = await fetch(
-        `${clientEnv.NEXT_PUBLIC_JAM_PACKED_WEBAPI_URL}/api/check-aura?isSkipCache=true`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ roomId: roomId, username: query }),
-        },
-      );
-      addTick("http");
 
-      if (response.ok) {
-        setHttpStatus("success");
+    if (mode === "throttle") {
+      const now = Date.now();
+      if (now - lastThrottleTimeRef.current >= 1000) {
+        throttledTrigger(val);
+        lastThrottleTimeRef.current = now;
       } else {
-        setHttpStatus("error");
-        const data = await response.json();
-        setHttpError(data.error || "Unknown error");
       }
-    } catch (e: any) {
-      setHttpStatus("error");
-      setHttpError(e.message || String(e));
-    } finally {
-      setProcessing(false);
+
+      return;
     }
-  }, [token, query]);
+  };
+
+  const handleModeChange = (isChecked: boolean) => {
+    const nextMode = isChecked ? "debounce" : "throttle";
+    if (nextMode !== mode) {
+      cancelPending();
+      setMode(nextMode);
+    }
+  };
+
+  const getMutationStatusColor = () => {
+    switch (checkAuraMutation.status) {
+      case "pending":
+        return "bg-yellow-500";
+      case "success":
+        return "bg-green-500";
+      case "error":
+        return "bg-red-500";
+      case "idle":
+      default:
+        return "bg-gray-500";
+    }
+  };
 
   // TODO: local errors and ext/network errors show stacked
 
@@ -72,33 +132,38 @@ export default function MainTextField() {
       <div className="mb-2 flex w-full gap-2">
         <ShrinkingInput
           label="Your Username"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          disabled={processing}
+          value={input}
+          onChange={handleInputChange}
           containerClassName="grow"
-          className="text-lg"
+          className="bg-red-500 text-lg"
         />
 
         <IconSwitch
-          isChecked={isChecked}
-          onCheckedChange={setIsChecked}
+          isChecked={mode === "debounce"}
+          onCheckedChange={handleModeChange}
           leftIcon={<GaugeIcon size={16} aria-hidden="true" />}
           rightIcon={<TimerIcon size={16} aria-hidden="true" />}
-          tooltipContent={`Switch to ${isChecked ? "Throttle" : "Debounce"} mode`}
+          tooltipContent={`Switch to ${mode === "throttle" ? "Throttle" : "Debounce"} mode`}
           tooltipDelay={1000}
           className="shrink"
         />
       </div>
-      <button
-        onClick={handleStart}
-        disabled={processing}
-        className="mb-4 rounded border bg-blue-500 px-4 py-2 text-white"
-      >
-        {processing ? "Processing..." : "Start Job"}
-      </button>
+      <p>
+        {mode}
+        {}
+      </p>
       <div className="mb-2">
-        <strong>HTTP Status:</strong> {httpStatus}
-        {httpError && <span className="ml-2 text-red-500">{httpError}</span>}
+        <strong>HTTP Status:</strong>{" "}
+        {checkAuraMutation.isPending
+          ? "loading"
+          : checkAuraMutation.isSuccess
+            ? "success"
+            : checkAuraMutation.isError
+              ? "error"
+              : "idle"}
+        {checkAuraMutation.error && (
+          <span className="ml-2 text-red-500">{checkAuraMutation.error.message}</span>
+        )}
       </div>
     </>
   );
