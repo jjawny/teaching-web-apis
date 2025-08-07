@@ -22,6 +22,7 @@ export default function CheckAuraInput() {
   const [input, setInput] = useState<string>("");
   const [mode, setMode] = useState<PacerModeType>("throttle");
   const [isSuccessful, setIsSuccessful] = useState<boolean>(false);
+  const [isHoneypotEngaged, setIsHoneypotEngaged] = useState<boolean>(false);
 
   const roomId = useWsCtx((ctx) => ctx.roomId);
   const addTick = useTimelineCtx((ctx) => ctx.addTick);
@@ -91,6 +92,12 @@ export default function CheckAuraInput() {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setInput(val);
+
+    if (isHoneypotEngaged) {
+      // Not visible to bots or scrapers
+      console.debug("Honeypot filled, skipping mutation");
+      return; // Skip processing if honeypot is filled
+    }
 
     if (mode === "debounce") {
       debouncedTriggerRef.current(val);
@@ -168,10 +175,57 @@ export default function CheckAuraInput() {
           inputClassName={cn("text-lg", getMutationStatusColor())}
           icon={getMutationStatusIcon()}
         />
+        <HoneypotField onChange={setIsHoneypotEngaged} />
         <PacerModeRadioGroup mode={mode} onModeChange={handleModeChange} className="shrink" />
       </div>
       {checkAuraMutation.error && <p className="text-red-500">{checkAuraMutation.error.message}</p>}
       <ModeHelperText mode={mode} />
+    </div>
+  );
+}
+
+// HoneypotField: visually hidden, but tempting for bots
+function HoneypotField({ onChange }: { onChange: (isEngaged: boolean) => void }) {
+  const [honeypot, setHoneypot] = useState<string>("");
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setHoneypot(val);
+    const isEngaged = val.trim().length > 0;
+    onChange(isEngaged);
+  };
+
+  // Lure with a common field like website (has a high win rate for bots)
+  // why not email? name? use a common field unrelated to the domain of the app, so for this app, use website, also unlikey to be autofilled if users are not targeting it w any info
+  // use a wrapping absolute div to hide it visually but not tip-off screen readers/bots using accessability like display none or visibility hidden
+  // having this absolute still makes it accessible to screen readers for less suspicion, using aria-hidden to not announce it, still present in DOM for bots
+  //
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: "-10000px",
+        top: "auto",
+        width: 1,
+        height: 1,
+        overflow: "hidden",
+      }}
+      aria-hidden="true"
+    >
+      <label htmlFor="website" style={{ display: "none" }}>
+        Website
+      </label>
+      <input
+        type="text"
+        id="website"
+        name="website"
+        autoComplete="off"
+        tabIndex={-1}
+        value={honeypot}
+        onChange={handleChange}
+        placeholder="Your website"
+        style={{ opacity: 0, height: 0, width: 0, pointerEvents: "none" }}
+      />
     </div>
   );
 }

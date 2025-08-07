@@ -117,7 +117,7 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
           JSON.stringify({
             action: "subscribe",
             roomId: roomId,
-            roomName: "Johnny's room", // TODO: this should be in the message as a prop
+            roomName: "The Arena", // TODO: this should be in the message as a prop
             pin: roomPin,
           }),
         );
@@ -190,7 +190,7 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
 
         const currentUserId = userCtx.getState().user?.id;
         if (data.type === WsMessageType.USER_JOINED && data.userId === currentUserId) {
-          joinedRoom(data.roomId, "Johnny's room", undefined);
+          joinedRoom(data.roomId, "The Arena", undefined);
           console.log("Successfully joined room");
           addMessage(data);
           addTick("ws");
@@ -246,7 +246,7 @@ export function useJoinWsRoom(isReady = false, maxRetries = 3) {
           JSON.stringify({
             action: "subscribe",
             roomId: newRoomId,
-            roomName: "Johnny's room",
+            roomName: "The Arena",
             pin: newPin,
           }),
         );

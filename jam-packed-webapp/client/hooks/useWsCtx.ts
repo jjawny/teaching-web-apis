@@ -50,7 +50,7 @@ export const useWsCtx = create<WsCtx>((set, get) => ({
   // For this demo, simply create a random new room
   // In a real app, we'd let the user choose/control their rooms
   roomId: "123",
-  roomName: "Johnny's room",
+  roomName: "The Arena",
   roomPin: undefined,
   messages: [],
   pinError: undefined,
