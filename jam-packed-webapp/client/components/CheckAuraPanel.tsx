@@ -6,9 +6,9 @@ import { Button } from "~/client/components/ui/button";
 import Pin from "~/client/components/ws-card/Pin";
 import { useJoinWsRoom } from "~/client/hooks/useJoinWsRoom";
 import { useWsCtx } from "~/client/hooks/useWsCtx";
-import MainTextField from "./MainTextField";
+import CheckAuraInput from "./CheckAuraInput";
 
-export default function MainContent() {
+export default function CheckAuraPanel() {
   const { reConnectAndJoinWithPin } = useJoinWsRoom(true);
 
   const wsReadyState = useWsCtx((ctx) => ctx.wsReadyState);
@@ -48,7 +48,7 @@ export default function MainContent() {
     return (
       <div className="flex flex-col items-center gap-4">
         <TimelineBar />
-        <MainTextField />
+        <CheckAuraInput />
       </div>
     );
   }

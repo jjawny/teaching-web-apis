@@ -16,7 +16,7 @@ import ShrinkingInput from "./ui/shrinking-input";
 
 type Mode = "throttle" | "debounce";
 
-export default function MainTextField() {
+export default function CheckAuraInput() {
   const [input, setInput] = useState<string>("");
   const [mode, setMode] = useState<Mode>("throttle");
   const [isSuccessful, setIsSuccessful] = useState<boolean>(false);
