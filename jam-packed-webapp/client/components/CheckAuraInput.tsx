@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, CheckCircle2, GaugeIcon, Loader2, TimerIcon } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, PlaneIcon } from "lucide-react";
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCheckAuraMutation } from "~/client/hooks/useCheckAuraMutation";
 import { useGetJamPackedWebApiTokenQuery } from "~/client/hooks/useGetJamPackedWebApiTokenQuery";
@@ -11,14 +11,16 @@ import { debounce } from "~/client/utils/debounce";
 import { throttle } from "~/client/utils/throttle";
 import { toastError } from "~/client/utils/toast-utils";
 import { TIMELINE_BAR_WIDTH_PX } from "~/shared/constants";
-import IconSwitch from "./ui/icon-switch";
+import { PacerModeType } from "../enums/pacer-mode";
+import PacerModeRadioGroup from "./PacerModeRadioGroup";
 import ShrinkingInput from "./ui/shrinking-input";
 
-type Mode = "throttle" | "debounce";
+const THROTTLE_TIME_MS = 1000;
+const DEBOUNCE_TIME_MS = 1000;
 
 export default function CheckAuraInput() {
   const [input, setInput] = useState<string>("");
-  const [mode, setMode] = useState<Mode>("throttle");
+  const [mode, setMode] = useState<PacerModeType>("throttle");
   const [isSuccessful, setIsSuccessful] = useState<boolean>(false);
 
   const roomId = useWsCtx((ctx) => ctx.roomId);
@@ -67,7 +69,7 @@ export default function CheckAuraInput() {
   const debouncedTriggerRef = useRef(
     debounce((val: string) => {
       triggerMutation(val);
-    }, 1000),
+    }, DEBOUNCE_TIME_MS),
   );
 
   // Throttle wrapper
@@ -76,7 +78,7 @@ export default function CheckAuraInput() {
       throttle((val: string) => {
         console.debug("throttle trigger", val);
         triggerMutation(val);
-      }, 1000),
+      }, THROTTLE_TIME_MS),
     [triggerMutation],
   );
 
@@ -97,7 +99,7 @@ export default function CheckAuraInput() {
 
     if (mode === "throttle") {
       const now = Date.now();
-      if (now - lastThrottleTimeRef.current >= 1000) {
+      if (now - lastThrottleTimeRef.current >= THROTTLE_TIME_MS) {
         throttledTrigger(val);
         lastThrottleTimeRef.current = now;
       } else {
@@ -107,9 +109,8 @@ export default function CheckAuraInput() {
     }
   };
 
-  const handleModeChange = (isChecked: boolean) => {
+  const handleModeChange = (nextMode: PacerModeType) => {
     addTick("click");
-    const nextMode = isChecked ? "debounce" : "throttle";
 
     if (nextMode !== mode) {
       cancelPending();
@@ -121,24 +122,24 @@ export default function CheckAuraInput() {
     // Separate from checkAuraMutation's success as temporary
 
     if (isSuccessful) {
-      return "border border-green-500 focus-visible:border-green-500 focus-visible:ring-green-500/50";
+      return "border border-lime-500 focus-visible:border-lime-500 focus-visible:ring-lime-500/50";
     }
     switch (checkAuraMutation.status) {
       case "pending":
         return "border border-yellow-500 focus-visible:border-yellow-500 focus-visible:ring-yellow-500/50";
       // case "success":
-      // return "border border-green-500 focus-visible:border-green-500 focus-visible:ring-green-500/50";
+      // return "border border-lime-500 focus-visible:border-lime-500 focus-visible:ring-lime-500/50";
       case "error":
         return "border border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/50";
       case "idle":
       default:
-        return "border border-gray-500 focus-visible:border-gray-500 focus-visible:ring-gray-500/50";
+        return "border border-gray-300 focus-visible:border-gray-300 focus-visible:ring-gray-300/50";
     }
   };
 
   const getMutationStatusIcon = () => {
     if (isSuccessful) {
-      return <CheckCircle2 className="text-green-500" size={20} />;
+      return <CheckCircle2 className="text-lime-500" size={20} />;
     }
     switch (checkAuraMutation.status) {
       case "pending":
@@ -158,7 +159,7 @@ export default function CheckAuraInput() {
       className="flex flex-col items-center text-center"
       style={{ width: `${TIMELINE_BAR_WIDTH_PX}px` }}
     >
-      <div className="mb-2 flex w-full gap-2">
+      <div className="bg- mb-2 flex w-full gap-2">
         <ShrinkingInput
           label="Your Username"
           value={input}
@@ -167,16 +168,7 @@ export default function CheckAuraInput() {
           className={cn("text-lg", getMutationStatusColor())}
           icon={getMutationStatusIcon()}
         />
-
-        <IconSwitch
-          isChecked={mode === "debounce"}
-          onCheckedChange={handleModeChange}
-          leftIcon={<GaugeIcon size={16} aria-hidden="true" />}
-          rightIcon={<TimerIcon size={16} aria-hidden="true" />}
-          tooltipContent={`Switch to ${mode === "throttle" ? "Throttle" : "Debounce"} mode`}
-          tooltipDelay={1000}
-          className="shrink"
-        />
+        <PacerModeRadioGroup mode={mode} onModeChange={handleModeChange} className="shrink" />
       </div>
       {checkAuraMutation.error && <p className="text-red-500">{checkAuraMutation.error.message}</p>}
       <ModeHelperText mode={mode} />
@@ -184,12 +176,22 @@ export default function CheckAuraInput() {
   );
 }
 
-function ModeHelperText({ mode }: { mode: Mode }) {
+function ModeHelperText({ mode }: { mode: PacerModeType }) {
+  const debounceTimeSeconds = DEBOUNCE_TIME_MS / 1000;
+  const throttleTimeSeconds = THROTTLE_TIME_MS / 1000;
   return (
     <p className="text-muted-foreground text-sm">
-      {mode === "throttle"
-        ? "Throttling; sends one (send) every {insert ms as seconds} seconds"
-        : "Debouncing, sends one (send icon tick) after {insert ms as seconds} seconds of inactivity"}
+      {mode === "throttle" ? (
+        <span className="flex">
+          Throttling sends one (<PlaneIcon strokeWidth={1} />) every {throttleTimeSeconds} second
+          {throttleTimeSeconds > 1 ? "s" : ""}
+        </span>
+      ) : (
+        <span className="flex">
+          Debouncing sends one (<PlaneIcon strokeWidth={1} />) after {debounceTimeSeconds} second
+          {debounceTimeSeconds > 1 ? "s" : ""} of inactivity
+        </span>
+      )}
     </p>
   );
 }
