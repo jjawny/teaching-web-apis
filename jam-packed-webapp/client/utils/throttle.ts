@@ -1,4 +1,5 @@
 /**
+ * You-Dont-Need-Lodash
  * Creates a throttled function that only invokes `func` at most once per every `timeFrame` milliseconds.
  */
 export function throttle<T extends (...args: any[]) => any>(

@@ -89,6 +89,7 @@ export default function MainTextField() {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setInput(val);
+
     if (mode === "debounce") {
       debouncedTriggerRef.current(val);
       return;
@@ -107,7 +108,9 @@ export default function MainTextField() {
   };
 
   const handleModeChange = (isChecked: boolean) => {
+    addTick("click");
     const nextMode = isChecked ? "debounce" : "throttle";
+
     if (nextMode !== mode) {
       cancelPending();
       setMode(nextMode);

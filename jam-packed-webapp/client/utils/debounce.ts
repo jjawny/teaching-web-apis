@@ -1,4 +1,5 @@
 /**
+ * You-Dont-Need-Lodash
  * Creates a debounced function that delays invoking `func` until after `wait` milliseconds
  * have elapsed since the last time the debounced function was invoked.
  * If `immediate` is true, trigger the function on the leading edge, instead of the trailing.
