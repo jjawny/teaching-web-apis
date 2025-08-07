@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -24,7 +24,8 @@ func RunServerWithGracefulShutdown(router *gin.Engine, port int, shutdownTimeout
 	//  	Non-blocking version of `router.Run` (which calls ListenAndServe internally)
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal("server error: ", err)
+			slog.Error("Server error", "error", err)
+
 		}
 	}()
 
@@ -40,7 +41,7 @@ func RunServerWithGracefulShutdown(router *gin.Engine, port int, shutdownTimeout
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer shutdownCancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		panic("server forced to shutdown: " + err.Error())
+		slog.Error("Server forced to shutdown", "error", err)
 	}
 
 	// Here we can cleanup:

@@ -17,18 +17,19 @@ import (
 	"jam-packed-webapi/internal/ws"
 )
 
+const (
+	jobQueueSize           = 100
+	resultsCacheExpiration = 5 * time.Minute
+	resultsCacheGCInterval = 10 * time.Minute
+)
+
 var (
 	validate = validator.New()
-	jobQueue = make(chan queue.Job, 100)
-
-	// A global cache for repeated queries to lessen server load and latency
-	resultCache = cache.New(5*time.Minute, 10*time.Minute)
-
-	// Routes that bypass the auth middleware
-	bypassAuthPaths = []string{
-		"/",   // Health check is anonymous
-		"/ws", // Websocket has its own JWT check as the browser cannot send custom headers for join requests
-	}
+	jobQueue = make(chan queue.Job, jobQueueSize)
+	// Cache for repeated queries to reduce load and latency
+	resultCache = cache.New(resultsCacheExpiration, resultsCacheGCInterval)
+	// `/ws` has its own JWT check (the browser cannot send custom headers for WS connect, will fail in AuthMiddleware)
+	bypassAuthMiddlewareRoutes = []string{"/", "/ws", "/test-global-error"}
 )
 
 func main() {
@@ -48,11 +49,12 @@ func main() {
 		AllowCredentials: true,
 	}))
 	router.Use(middleware.ErrorHandlingMiddleware())
-	router.Use(middleware.AuthMiddleware(bypassAuthPaths))
-	router.Use(middleware.UserRateLimitMiddleware(bypassAuthPaths))
+	router.Use(middleware.AuthMiddleware(bypassAuthMiddlewareRoutes))
+	router.Use(middleware.UserRateLimitMiddleware(bypassAuthMiddlewareRoutes))
 
 	router.GET("/", routes.HealthCheckHandler)
 	router.GET("/ws", ws.ServeWS(wsHub))
+	router.GET("/test-global-error", routes.TestGlobalErrorHandler)
 	router.POST("/api/check-aura", routes.AuraCheckHandler(validate, resultCache, jobQueue, wsHub))
 
 	// router.Run(":8080")

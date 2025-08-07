@@ -2,7 +2,7 @@ package queue
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 	"strconv"
 	"time"
 
@@ -52,11 +52,12 @@ func StartWorker(jobQueue chan Job, resultCache *cache.Cache, wsHub *ws.Hub) {
 		if err != nil {
 			jobDetails := "Failed to check aura for " + username + ", reason: " + err.Error()
 			wsHub.Notify(ws.Message{RoomId: roomID, JobId: job.JobId.String(), Type: ws.JobFailed, Details: jobDetails})
-			log.Printf("[QUEUE WORKER] Failed to process job: %v", err)
+			slog.Error("[QUEUE WORKER] Failed to process job", "username", username, "jobId", job.JobId, "error", err)
+
 		} else {
 			jobDetails := username + " has " + strconv.Itoa(fakeAura) + "x more aura than Ryan Gosling"
 			wsHub.Notify(ws.Message{RoomId: roomID, JobId: job.JobId.String(), Type: ws.JobSucceeded, Details: jobDetails})
-			log.Printf("[QUEUE WORKER] Successfully processed job: %v", job.JobId)
+			slog.Info("[QUEUE WORKER] Successfully processed job", "username", username, "jobId", job.JobId)
 		}
 	}
 }
