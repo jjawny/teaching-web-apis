@@ -12,8 +12,8 @@ type Client struct {
 
 type Hub struct {
 	clients           map[*Client]bool
-	rooms             map[string]map[*Client]bool // hub[roomId] -> many clients
-	roomPins          map[string]string           // hub[roomId] -> 1x pin
+	rooms             map[string]map[*Client]bool // 1 hub[roomId] -> many clients
+	roomPins          map[string]string           // 1 hub[roomId] -> 1 pin
 	register          chan *Client
 	unregister        chan *Client
 	broadcast         chan Message

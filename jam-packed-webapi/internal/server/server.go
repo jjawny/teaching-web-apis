@@ -49,5 +49,4 @@ func RunServerWithGracefulShutdown(router *gin.Engine, port int, shutdownTimeout
 	// 	- Handle job queue
 	// 		- Wait for worker to finish processing
 	// 		- Drain out of in-memory queue into an external queue/DB
-	// TODO: broadcast a message to all current websocket clients saying we shutdown going offline
 }

@@ -18,9 +18,11 @@ import (
 )
 
 const (
+	port                   = 8080
 	jobQueueSize           = 100
 	resultsCacheExpiration = 5 * time.Minute
 	resultsCacheGCInterval = 10 * time.Minute
+	shutdownTimeout        = 5 * time.Second
 )
 
 var (
@@ -34,8 +36,6 @@ var (
 
 func main() {
 	_ = godotenv.Load()
-
-	// TODO: Add better logger
 
 	wsHub := ws.NewHub()
 	go queue.StartWorker(jobQueue, resultCache, wsHub)
@@ -58,5 +58,5 @@ func main() {
 	router.POST("/api/check-aura", routes.AuraCheckHandler(validate, resultCache, jobQueue, wsHub))
 
 	// router.Run(":8080")
-	server.RunServerWithGracefulShutdown(router, 8080, 5*time.Second)
+	server.RunServerWithGracefulShutdown(router, port, shutdownTimeout)
 }

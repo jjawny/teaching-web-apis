@@ -66,14 +66,14 @@ func (hub *Hub) SubscribeWithPin(client *Client, roomId, pin string) error {
 
 		// Room does not exist, require valid 4-digit pin to create
 		if len(pin) != 4 {
-			return fmt.Errorf(BadPin)
+			return fmt.Errorf(string(BadPin))
 		}
 		hub.rooms[roomId] = make(map[*Client]bool)
 		hub.roomPins[roomId] = pin
 	} else {
 		// Room exists, check pin
 		if hub.roomPins[roomId] != pin {
-			return fmt.Errorf(IncorrectPin)
+			return fmt.Errorf(string(IncorrectPin))
 		}
 	}
 

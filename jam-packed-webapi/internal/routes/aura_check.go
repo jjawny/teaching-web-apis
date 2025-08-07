@@ -35,10 +35,10 @@ func AuraCheckHandler(validate *validator.Validate, resultCache *cache.Cache, jo
 			if cachedResult, found := resultCache.Get(req.Username); found {
 				// Cache hit!
 				jobDetails := req.Username + " has " + strconv.Itoa(cachedResult.(int)) + "x more aura than Ryan Gosling"
-				wsHub.Notify(ws.Message{RoomId: req.RoomId, Type: ws.JobReturnedFromCache, Details: jobDetails})
+				wsHub.Notify(ws.Message{RoomId: req.RoomId, Type: string(ws.JobReturnedFromCache), Details: jobDetails})
 
 				res := CheckAuraResponseDto{
-					JobStatus: ws.JobQueued,
+					JobStatus: string(ws.JobQueued),
 				}
 				ctx.JSON(http.StatusOK, res)
 				return
@@ -64,7 +64,7 @@ func AuraCheckHandler(validate *validator.Validate, resultCache *cache.Cache, jo
 			jobIdStr := job.JobId.String()
 			res := CheckAuraResponseDto{
 				JobId:     &jobIdStr,
-				JobStatus: ws.JobQueued,
+				JobStatus: string(ws.JobQueued),
 			}
 			ctx.JSON(http.StatusAccepted, res)
 		case <-queueJobCtx.Done():
