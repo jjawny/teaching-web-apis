@@ -21,7 +21,7 @@ func StartWorker(jobQueue chan Job, resultCache *cache.Cache, wsHub *ws.Hub) {
 	for job := range jobQueue {
 		roomID, jobId, username := job.RoomId, job.JobId.String(), job.Username
 		time.Sleep(5000 * time.Millisecond) // sim some latency
-		fakeAura := 10                      // fake aura value
+		fakeAura := 100                     // fake aura value
 
 		wsHub.Notify(ws.Message{RoomId: roomID, JobId: jobId, Type: ws.JobStarted, Details: "Started checking aura for " + username})
 
@@ -54,7 +54,7 @@ func StartWorker(jobQueue chan Job, resultCache *cache.Cache, wsHub *ws.Hub) {
 			wsHub.Notify(ws.Message{RoomId: roomID, JobId: job.JobId.String(), Type: ws.JobFailed, Details: jobDetails})
 			log.Printf("[QUEUE WORKER] Failed to process job: %v", err)
 		} else {
-			jobDetails := username + " has " + strconv.Itoa(fakeAura) + "x more aura"
+			jobDetails := username + " has " + strconv.Itoa(fakeAura) + "x more aura than Ryan Gosling"
 			wsHub.Notify(ws.Message{RoomId: roomID, JobId: job.JobId.String(), Type: ws.JobSucceeded, Details: jobDetails})
 			log.Printf("[QUEUE WORKER] Successfully processed job: %v", job.JobId)
 		}
