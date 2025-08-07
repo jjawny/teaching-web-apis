@@ -50,7 +50,7 @@ func UserRateLimitMiddleware(bypassPaths []string) gin.HandlerFunc {
 		// `userId` must be set in AuthMiddleware
 		userId, exists := ctx.Get("userId")
 		if !exists {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing userId for rate limiting"})
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token missing claims"})
 			return
 		}
 
