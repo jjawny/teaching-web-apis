@@ -4,6 +4,10 @@ export const LOGIN_ROUTE = "/login";
 export const ANON_ROUTES = [LOGIN_ROUTE];
 export const GOOGLE_LOGO_URL = "/images/google-logo.svg";
 
+// Queries and Mutations
+export const TEST_ERROR_FOR_CHECK_AURA_QUERY = ":::error:::";
+export const TEST_LAG_FOR_CHECK_AURA_QUERY = ":::lag:::";
+
 // <TimelineBar> constants
 export const TIMELINE_BAR_WIDTH_PX = 400;
 export const TIMELINE_ICON_SIZE_PX = 15;

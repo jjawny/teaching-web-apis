@@ -1,54 +1,48 @@
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
+import z from "zod";
 import { getExponentialBackoffDelay } from "~/client/utils/retry-utils";
 import { sleep } from "~/client/utils/sleep";
+import { TEST_ERROR_FOR_CHECK_AURA_QUERY, TEST_LAG_FOR_CHECK_AURA_QUERY } from "~/shared/constants";
+import { CheckAuraReqsponse, CheckAuraReqsponseSchema } from "~/shared/models/check-aura";
 import { clientEnv } from "~/shared/modules/env";
 
-interface ProcessJobVariables {
+type CheckAuraMutationArgs = {
   roomId: string;
   username: string;
   token: string;
-}
+  isSkipCache?: boolean;
+};
 
-interface ProcessResponse {
-  [key: string]: any;
-}
-
-/**
- * React Query mutation hook to process a job by calling the check-aura API.
- *
- * Automatically handles:
- * - Token fetching and validation
- * - API request with proper headers and authentication
- * - Error handling and user-friendly error messages
- * - Timeline tick tracking
- */
 export function useCheckAuraMutation() {
-  return useMutation<ProcessResponse, Error, ProcessJobVariables>({
+  return useMutation<CheckAuraReqsponse, Error, CheckAuraMutationArgs>({
     mutationFn: (variables) => processJobMutationFn(variables),
     retryDelay: (attempt) => getExponentialBackoffDelay(attempt),
     retry: 3,
   });
 }
 
-// Unfortunately, RQ expects a thrown error for error prop, so throw
-// and expose a user-friendly message for the UI, but log (warn) the full response.
-async function processJobMutationFn(variables: ProcessJobVariables): Promise<ProcessResponse> {
-  const { roomId, username, token } = variables;
+async function processJobMutationFn(variables: CheckAuraMutationArgs): Promise<CheckAuraReqsponse> {
+  const { roomId, username, token, isSkipCache = true } = variables;
 
-  if (!token || !roomId) {
-    const errorMessage = "No token or room ID available, cannot start job";
-    toast.error(errorMessage);
-    throw new Error(errorMessage);
+  if (!token) {
+    throw new Error("Token missing, cannot start job");
   }
-  await sleep(1000);
 
-  if (username.toLocaleLowerCase() === ":::error:::") {
+  if (!roomId) {
+    throw new Error("Room ID missing, cannot start job");
+  }
+
+  if (username.toLocaleLowerCase() === TEST_LAG_FOR_CHECK_AURA_QUERY) {
+    console.debug("Simulating latency for testing purposes");
+    await sleep(1000);
+  }
+
+  if (username.toLocaleLowerCase() === TEST_ERROR_FOR_CHECK_AURA_QUERY) {
     throw new Error("Simulated error for testing purposes");
   }
 
-  const response = await fetch(
-    `${clientEnv.NEXT_PUBLIC_JAM_PACKED_WEBAPI_URL}/api/check-aura?isSkipCache=true`,
+  const res = await fetch(
+    `${clientEnv.NEXT_PUBLIC_JAM_PACKED_WEBAPI_URL}/api/check-aura?isSkipCache=${isSkipCache}`,
     {
       method: "POST",
       headers: {
@@ -59,11 +53,21 @@ async function processJobMutationFn(variables: ProcessJobVariables): Promise<Pro
     },
   );
 
-  if (!response.ok) {
-    const data = await response.json();
-    const errorMessage = data.error || "Unknown error";
+  if (!res.ok) {
+    const errorMessage = "Oh no! Unable to check your aura, please refresh to try again";
+    console.warn(errorMessage, res);
+
     throw new Error(errorMessage);
   }
 
-  return await response.json();
+  const data = await res.json();
+  const validationRes = CheckAuraReqsponseSchema.safeParse(data);
+
+  if (!validationRes.success) {
+    const errorMessage = `Oh no! Unexpected response from the server: ${z.prettifyError(validationRes.error)}`;
+    console.warn(errorMessage, validationRes.error);
+    throw new Error(errorMessage);
+  }
+
+  return validationRes.data;
 }

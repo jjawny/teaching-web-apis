@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import z from "zod";
 import { userCtx } from "~/client/modules/user-context";
 import { JAM_PACKED_WEB_API_JWT_EXPIRY_MS } from "~/shared/constants";
 import { JamPackedWebApiJwtSchema } from "~/shared/models/jam-packed-webapi-token";
@@ -54,7 +55,7 @@ async function queryFn(): Promise<string> {
   const validationRes = JamPackedWebApiJwtSchema.safeParse(data);
 
   if (!validationRes.success) {
-    const errorMessage = "Oh no! Unexpected response from the server";
+    const errorMessage = `Oh no! Unexpected response from the server: ${z.prettifyError(validationRes.error)}`;
     console.warn(errorMessage, validationRes.error);
     throw new Error(errorMessage);
   }
