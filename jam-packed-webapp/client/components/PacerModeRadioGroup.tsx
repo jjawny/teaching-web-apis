@@ -45,7 +45,7 @@ function PacerModeOption({
   return (
     <div
       className={cn(
-        "border-input has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex min-w-fit cursor-pointer items-center gap-3 rounded-md border px-2 text-center shadow-xs transition-[color,box-shadow] outline-none has-focus-visible:ring-[3px]",
+        "border-input has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex min-w-fit cursor-pointer items-center gap-1 rounded-md border px-2 text-center shadow-xs transition-[color,box-shadow] outline-none has-focus-visible:ring-[3px]",
         "has-data-[state=checked]:border-stone-300 has-data-[state=checked]:bg-stone-200",
         "transition-all duration-300 ease-in-out",
       )}

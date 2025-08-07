@@ -159,13 +159,13 @@ export default function CheckAuraInput() {
       className="flex flex-col items-center text-center"
       style={{ width: `${TIMELINE_BAR_WIDTH_PX}px` }}
     >
-      <div className="bg- mb-2 flex w-full gap-2">
+      <div className="mb-2 flex w-full gap-2">
         <ShrinkingInput
           label="Your Username"
           value={input}
           onChange={handleInputChange}
           containerClassName="grow"
-          className={cn("text-lg", getMutationStatusColor())}
+          inputClassName={cn("text-lg", getMutationStatusColor())}
           icon={getMutationStatusIcon()}
         />
         <PacerModeRadioGroup mode={mode} onModeChange={handleModeChange} className="shrink" />

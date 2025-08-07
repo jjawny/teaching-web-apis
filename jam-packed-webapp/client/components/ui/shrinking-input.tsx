@@ -4,7 +4,7 @@ import { Input } from "./input";
 
 export default function ShrinkingInput({
   containerClassName,
-  className,
+  inputClassName,
   label,
   icon,
 
@@ -12,6 +12,7 @@ export default function ShrinkingInput({
 }: React.ComponentProps<"input"> & {
   label?: string;
   containerClassName?: string;
+  inputClassName?: string;
   icon?: React.ReactNode;
 }) {
   const id = useId();
@@ -28,7 +29,7 @@ export default function ShrinkingInput({
       >
         <span className="bg-background inline-flex px-2">{label}</span>
       </label>
-      <Input id={id} placeholder=" " className={className} {...props} />
+      <Input id={id} placeholder=" " className={inputClassName} {...props} />
       {icon && (
         <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
           {icon}
