@@ -16,7 +16,7 @@ const UsernameForMockFailure = ":::fail:::"
 const UsernameForMockRetries = ":::retry:::"
 const RetryAttempts = 3
 
-func StartWorker(jobQueue chan Job, resultCache *cache.Cache, wsHub *ws.Hub) {
+func StartWorker(jobQueue chan Job, resultsCache *cache.Cache, wsHub *ws.Hub) {
 	// Dequeue
 	for job := range jobQueue {
 		roomID, jobId, username := job.RoomId, job.JobId.String(), job.Username
@@ -41,7 +41,7 @@ func StartWorker(jobQueue chan Job, resultCache *cache.Cache, wsHub *ws.Hub) {
 					}
 				}
 				auraResult = fakeAura // success, set result
-				resultCache.Set(username, auraResult, cache.DefaultExpiration)
+				resultsCache.Set(username, auraResult, cache.DefaultExpiration)
 				return nil
 			},
 			retry.Attempts(RetryAttempts),

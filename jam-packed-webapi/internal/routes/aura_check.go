@@ -15,7 +15,7 @@ import (
 	"jam-packed-webapi/internal/ws"
 )
 
-func AuraCheckHandler(validate *validator.Validate, resultCache *cache.Cache, jobQueue chan queue.Job, wsHub *ws.Hub) gin.HandlerFunc {
+func AuraCheckHandler(validate *validator.Validate, resultsCache *cache.Cache, jobQueue chan queue.Job, wsHub *ws.Hub) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// Unmarshal the HTTP request (parse JSON body into GO struct)
 		var req CheckAuraRequestDto
@@ -32,7 +32,7 @@ func AuraCheckHandler(validate *validator.Validate, resultCache *cache.Cache, jo
 
 		// Check the cache for early return
 		if ctx.Query("isSkipCache") != "true" {
-			if cachedResult, found := resultCache.Get(req.Username); found {
+			if cachedResult, found := resultsCache.Get(req.Username); found {
 				// Cache hit!
 				jobDetails := req.Username + " has " + strconv.Itoa(cachedResult.(int)) + "x more aura than Ryan Gosling"
 				wsHub.Notify(ws.Message{RoomId: req.RoomId, Type: string(ws.JobReturnedFromCache), Details: jobDetails})
