@@ -1,44 +1,17 @@
-import Image from "next/image";
-import Versus from "~/client/components/Versus";
 import { cn } from "~/client/utils/cn";
+import Versus from "./Versus";
 
 export default function Hero() {
   return (
-    <div>
-      <div className="flex w-full items-center justify-center gap-2">
-        <Image
-          className="opacity-20"
-          src="/images/unknown.svg"
-          alt="Unknown User"
-          width={100}
-          height={20}
-          priority
-        />
-        <Versus
-          className={cn(
-            "animate-vibrate ![filter:drop-shadow(0_4px_0_black)] filter",
-            "-ml-[15px]",
-          )}
-        />
-        <Image
-          aria-hidden
-          src="/images/ryangosling.png"
-          alt="Ryan Gosling"
-          width={100}
-          height={20}
-          priority
-        />
+    <div className="flex flex-col items-center">
+      <div className="flex items-center gap-2">
+        <h1 className="font-instrument-serif text-center text-3xl">It's You</h1>
+        <Versus className={cn("animate-vibrate ![filter:drop-shadow(0_4px_0_black)] filter")} />
+        <h1 className="font-instrument-serif text-center text-3xl">The World</h1>
       </div>
-      <h1 className="font-instrument-serif text-center">
-        <span className="text-4xl">Do You Have More</span>
-        <span className="text-5xl">
-          {" "}
-          Aura
-          <br />
-          Than
-        </span>
-        <span className="text-6xl"> Ryan Gosling?</span>
-      </h1>
+      <h2 className="font-instrument-serif text-center text-xl">
+        Type your username to check your aura
+      </h2>
     </div>
   );
 }

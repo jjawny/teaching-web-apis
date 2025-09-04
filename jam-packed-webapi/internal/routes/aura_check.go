@@ -34,7 +34,7 @@ func AuraCheckHandler(validate *validator.Validate, resultsCache *cache.Cache, j
 		if ctx.Query("isSkipCache") != "true" {
 			if cachedResult, found := resultsCache.Get(req.Username); found {
 				// Cache hit!
-				jobDetails := req.Username + " has " + strconv.Itoa(cachedResult.(int)) + "x more aura than Ryan Gosling"
+				jobDetails := req.Username + " has " + strconv.Itoa(cachedResult.(int)) + " aura points"
 				wsHub.Notify(ws.Message{RoomId: req.RoomId, Type: string(ws.JobReturnedFromCache), Details: jobDetails})
 
 				res := CheckAuraResponseDto{

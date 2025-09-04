@@ -51,8 +51,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "The Most Bulletproof HTTP Request",
-  description: "Do You Have More Aura Than Ryan Gosling?",
+  title: "Jam Packed Web App",
+  description: "This is jam packed web app",
 };
 
 const REFRESH_AUTH_INTERVAL = 60 * 30; // 30 minutes

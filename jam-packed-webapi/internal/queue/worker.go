@@ -55,7 +55,7 @@ func StartWorker(jobQueue chan Job, resultsCache *cache.Cache, wsHub *ws.Hub) {
 			slog.Error("[QUEUE WORKER] Failed to process job", "username", username, "jobId", job.JobId, "error", err)
 
 		} else {
-			jobDetails := username + " has " + strconv.Itoa(fakeAura) + "x more aura than Ryan Gosling"
+			jobDetails := username + " has " + strconv.Itoa(fakeAura) + " aura points"
 			wsHub.Notify(ws.Message{RoomId: roomID, JobId: job.JobId.String(), Type: string(ws.JobSucceeded), Details: jobDetails})
 			slog.Info("[QUEUE WORKER] Successfully processed job", "username", username, "jobId", job.JobId)
 		}

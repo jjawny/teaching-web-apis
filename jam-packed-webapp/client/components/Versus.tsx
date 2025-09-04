@@ -1,8 +1,13 @@
+import { cn } from "~/client/utils/cn";
+
 export default function Versus({ className }: { className?: string }) {
   return (
     <div className={className}>
       <svg
-        className="-mr-[.25em] -ml-[.5em] inline-block h-[8em] text-red-500 group-hover:scale-105 group-hover:animate-[vibrate_0.35s_infinite] group-hover:[filter:drop-shadow(0_2px_black)]"
+        className={cn(
+          "h-[3em]",
+          "-mr-[.25em] -ml-[.5em] inline-block text-red-500 group-hover:scale-105 group-hover:animate-[vibrate_0.35s_infinite] group-hover:[filter:drop-shadow(0_2px_black)]",
+        )}
         viewBox="0 0 256 256"
         aria-label="versus"
       >
