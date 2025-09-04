@@ -11,7 +11,7 @@
 ## How to run the [frontend](./jam-packed-webapp/)
 - Assuming you have [asdf](https://asdf-vm.com/) installed
 - `cp .env.example .env` populate missing fields in [.env](./jam-packed-webapp/.env)
-s- `npm i`
+- `npm i`
 - `npm run dev`
 
 ## How to run the [backend](./jam-packed-webapi/)
