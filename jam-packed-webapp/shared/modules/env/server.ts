@@ -2,7 +2,7 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 const GOOGLE_OAUTH_GUIDE =
-  "See Google Cloud Console > APIs & Services > Credentials > Create an OAuth client";
+  "See Google Cloud Console > APIs & Services > Credentials > create a new OAuth 2.0 (web) Client";
 
 export const env = createEnv({
   server: {
